@@ -1,5 +1,15 @@
 #include "main.h"
 
+void setup(void) {
+    frame_buffer = (uint32_t*)malloc((sizeof(uint32_t)) * (window_width * window_height)); 
+
+    if (frame_buffer == NULL) {
+        return;
+    }
+
+    frame_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, window_width, window_height); 
+}
+
 void handle_input(void) {
     SDL_Event event;
     SDL_PollEvent(&event);
@@ -17,7 +27,23 @@ void handle_input(void) {
     }
 }
 
+void render_window(void) {
+    // draw_grid(); 
+    draw_rectangle((window_width/2) - 100, (window_height/2) - 100, 400, 200, 0xFF00FFFF);
+    update_renderer_texture();
+    clear_frame_buffer(0xFF000000); 
+    SDL_RenderPresent(renderer);
+}
+
+void cleanup(void) {
+    free(frame_buffer);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+}
+
 void update(void) {
+
 }
 
 int main(void) {

@@ -1,5 +1,10 @@
 #include "display.h"
 
+SDL_Window *window = NULL; 
+SDL_Renderer *renderer = NULL; 
+uint32_t *frame_buffer = NULL; 
+SDL_Texture *frame_buffer_texture = NULL; 
+
 bool create_window(void) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         fprintf(stderr, "Failed to initialize SDL: %s\n", SDL_GetError());
@@ -32,28 +37,21 @@ bool create_window(void) {
     return true; 
 }
 
-void setup(void) {
-    frame_buffer = (uint32_t*)malloc((sizeof(uint32_t)) * (window_width * window_height)); 
-
-    if (frame_buffer == NULL) {
-        return;
-    }
-
-    frame_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, window_width, window_height); 
-}
-
 void clear_frame_buffer(uint32_t clear_color) {
     for (int i=0; i < (window_height * window_width); i++) {
         frame_buffer[i] = clear_color; 
     }
 }
 
+void draw_pixel(int x, int y, uint32_t color) {
+    frame_buffer[(y * window_width) + x] = color; 
+}
+
 void draw_grid(void) {
     for (int row=0; row < window_height; row++) {
         for (int column=0; column < window_width; column++) {
             if (row % 10 == 0 || column % 10 == 0) {
-                int pixel_idx = (row * window_width) + column; 
-                frame_buffer[pixel_idx] = 0xFFFFFFFF;
+                draw_pixel(column, row, 0xFFFFFFFF);
             }
         }
     }
@@ -62,8 +60,7 @@ void draw_grid(void) {
 void draw_rectangle(int x, int y, int width, int height, uint32_t color) {
     for (int row=y; row < height+y; row++) {
         for (int column=x; column < width+x; column++) {
-                int pixel_idx = (row * window_width) + column; 
-                frame_buffer[pixel_idx] = color;
+                draw_pixel(column, row, color);
         }
     }
 }
@@ -73,17 +70,3 @@ void update_renderer_texture(void) {
     SDL_RenderCopy(renderer, frame_buffer_texture, NULL, NULL); 
 }
 
-void render_window(void) {
-    // draw_grid(); 
-    draw_rectangle((window_width/2) - 100, (window_height/2) - 100, 200, 200, 0xFF00FFFF);
-    update_renderer_texture();
-    clear_frame_buffer(0xFF000000); 
-    SDL_RenderPresent(renderer);
-}
-
-void cleanup(void) {
-    free(frame_buffer);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-}
