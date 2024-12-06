@@ -71,7 +71,7 @@ void handle_input(void) {
     }
 }
 
-void wipe_frame_buffer(uint32_t wipe_color) {
+void clear_frame_buffer(uint32_t wipe_color) {
     for (int i=0; i < (window_height * window_width); i++) {
         frame_buffer[i] = wipe_color; 
     }
@@ -88,15 +88,25 @@ void draw_grid(void) {
     }
 }
 
+void draw_rectangle(int x, int y, int width, int height, uint32_t color) {
+    for (int row=y; row < height+y; row++) {
+        for (int column=x; column < width+x; column++) {
+                int pixel_idx = (row * window_width) + column; 
+                frame_buffer[pixel_idx] = 0xFFFFFFFF;
+        }
+    }
+}
+
 void update_renderer_texture(void) {
     SDL_UpdateTexture(frame_buffer_texture, NULL, frame_buffer, (int)(window_width * sizeof(uint32_t))); 
     SDL_RenderCopy(renderer, frame_buffer_texture, NULL, NULL); 
 }
 
 void render_window(void) {
+    // draw_grid(); 
+    draw_rectangle((window_width/2) - 100, (window_height/2) - 100, 200, 200, 0xFFFFFFFF);
     update_renderer_texture();
-    // wipe_frame_buffer(0xFFFF0000); 
-    draw_grid(); 
+    clear_frame_buffer(0xFFFF0000); 
     SDL_RenderPresent(renderer);
 }
 
