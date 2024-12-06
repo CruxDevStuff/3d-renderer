@@ -6,6 +6,11 @@
 SDL_Window *window; 
 SDL_Renderer *renderer; 
 bool running; 
+uint32_t *frame_buffer; 
+SDL_Texture *frame_buffer_texture; 
+
+int window_height = 600;
+int window_width = 800; 
 
 bool create_window(void) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -13,19 +18,22 @@ bool create_window(void) {
         return false;
     }
 
-    window = SDL_CreateWindow("renderer",
-                                          SDL_WINDOWPOS_CENTERED,
-                                          SDL_WINDOWPOS_CENTERED,
-                                          800, 600,
-                                          SDL_WINDOW_BORDERLESS);
+    // window     
+    SDL_DisplayMode display_node; 
+    SDL_GetCurrentDisplayMode(0, &display_node); 
+    window_width = display_node.w; 
+    window_height = display_node.h; 
+    
+    window = SDL_CreateWindow("renderer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, SDL_WINDOW_BORDERLESS);
     if (!window) {
         fprintf(stderr, "Failed to create window: %s\n", SDL_GetError());
         SDL_Quit();
         return false;
     }
+    SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN); 
 
+    // renderer 
     renderer = SDL_CreateRenderer(window, -1, 0);
-
     if (!renderer) {
         fprintf(stderr, "Failed to create renderer: %s\n", SDL_GetError());
         SDL_DestroyWindow(window);
@@ -34,6 +42,16 @@ bool create_window(void) {
     }
 
     return true; 
+}
+
+void setup(void) {
+    frame_buffer = (uint32_t*)malloc((sizeof(uint32_t)) * (window_width * window_height)); 
+
+    if (frame_buffer == NULL) {
+        return;
+    }
+
+    frame_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, window_width, window_height); 
 }
 
 void handle_input(void) {
@@ -53,24 +71,58 @@ void handle_input(void) {
     }
 }
 
+void wipe_frame_buffer(uint32_t wipe_color) {
+    for (int i=0; i < (window_height * window_width); i++) {
+        frame_buffer[i] = wipe_color; 
+    }
+}
+
+void draw_grid(void) {
+    for (int row=0; row < window_height; row++) {
+        for (int column=0; column < window_width; column++) {
+            if (row % 10 == 0 || column % 10 == 0) {
+                int pixel_idx = (row * window_width) + column; 
+                frame_buffer[pixel_idx] = 0xFFFFFFFF;
+            }
+        }
+    }
+}
+
+void update_renderer_texture(void) {
+    SDL_UpdateTexture(frame_buffer_texture, NULL, frame_buffer, (int)(window_width * sizeof(uint32_t))); 
+    SDL_RenderCopy(renderer, frame_buffer_texture, NULL, NULL); 
+}
+
 void render_window(void) {
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    SDL_RenderClear(renderer);
+    update_renderer_texture();
+    // wipe_frame_buffer(0xFFFF0000); 
+    draw_grid(); 
     SDL_RenderPresent(renderer);
 }
 
+
 void update(void) {
-    return;
+}
+
+void cleanup() {
+    free(frame_buffer);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
 }
 
 int main(void) {
     running = create_window(); 
+
+    setup(); 
 
     while (running) {
         handle_input(); 
         update();
         render_window(); 
     }
+
+    cleanup(); 
 
     printf("sup bro, you got me compiled, thank you...:))"); 
     return 0;
