@@ -2,8 +2,11 @@
 
 const int cube_side = 9; 
 const int POINT_N = cube_side * cube_side * cube_side;
+const int FOV_SCALE_FACTOR = 1000; 
+
 vec3_t cube_points[POINT_N];
 vec2_t projected_points[POINT_N]; 
+vec3_t camera_position = {.x=0, .y=0, .z=-5}; 
 
 void setup(void) {
     frame_buffer = (uint32_t*)malloc((sizeof(uint32_t)) * (window_width * window_height)); 
@@ -47,7 +50,13 @@ void handle_input(void) {
 }
 
 vec2_t get_projection_2d(vec3_t vec3_point) {
-    vec2_t point_2d = {.x=256 * vec3_point.x, .y=256* vec3_point.y}; 
+    /* MATH: 
+    find projected value of X and Y on screen 
+    using a property of similar triangles(the ratios of their sides are equal) 
+    */
+    vec3_point.z -= camera_position.z;
+    vec2_t point_2d = {.x=(FOV_SCALE_FACTOR * vec3_point.x / vec3_point.z), 
+                    .y=(FOV_SCALE_FACTOR * vec3_point.y / vec3_point.z)}; 
     return point_2d;
 }
 
@@ -90,6 +99,6 @@ int main(void) {
 
     cleanup(); 
 
-    printf("sup bro, you got me compiled, thank you...:))"); 
+    printf("BYE BYE...:))"); 
     return 0;
 }
