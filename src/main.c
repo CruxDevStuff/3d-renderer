@@ -7,6 +7,7 @@ const int FOV_SCALE_FACTOR = 1000;
 vec3_t cube_points[POINT_N];
 vec2_t projected_points[POINT_N]; 
 vec3_t camera_position = {.x=0, .y=0, .z=-5}; 
+vec3_t rotation = {.x=0, .y=0, .z=0}; 
 
 void setup(void) {
     frame_buffer = (uint32_t*)malloc((sizeof(uint32_t)) * (window_width * window_height)); 
@@ -29,6 +30,24 @@ void create_point_cloud(void) {
             }
         }
     }
+}
+
+vec3_t get_rotated_point(vec3_t point, vec3_t rotation) {
+    vec3_t rotated_z_point = {
+        /*
+        MATH: 
+        double angle formulas of COS and SIN 
+        */
+        .x=point.x * cos(rotation.z) - point.y * sin(rotation.z),
+        .y=point.y * cos(rotation.z) + point.x * sin(rotation.z),
+        .z=point.z
+    }; 
+    return rotated_z_point; 
+
+    /*
+    TODO:
+    X and Y rotation 
+    */ 
     
 }
 
@@ -79,8 +98,16 @@ void cleanup(void) {
     SDL_Quit();
 }
 void update(void) {
+    // for (int i = 0; i < POINT_N; i++) {
+    //     vec3_t rotation = {.x=1, .y=1, .z=(3.14/2)}; 
+    //     vec3_t rotated_point = get_rotated_point(cube_points[i], rotation); 
+    //     cube_points[i] = rotated_point; 
+    // }
+    rotation.z += 0.001; 
+    
     for (int i = 0; i < POINT_N; i++){
-        vec2_t point_2d = get_projection_2d(cube_points[i]); 
+        vec3_t rotated_point = get_rotated_point(cube_points[i], rotation); 
+        vec2_t point_2d = get_projection_2d(rotated_point); 
         projected_points[i] = point_2d;
     }
 }
