@@ -1,5 +1,6 @@
 #include "display.h"
 #include "stdio.h"
+#include "vector.h"
 
 bool running = false; 
 void setup(void); 
