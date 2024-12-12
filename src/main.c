@@ -3,11 +3,16 @@
 const int cube_side = 9; 
 const int POINT_N = cube_side * cube_side * cube_side;
 const int FOV_SCALE_FACTOR = 1000; 
+const int FPS = 30;
+const int frame_time = (1000 / FPS); 
 
 vec3_t cube_points[POINT_N];
 vec2_t projected_points[POINT_N]; 
 vec3_t camera_position = {.x=0, .y=0, .z=-5}; 
 vec3_t rotation = {.x=0, .y=0, .z=0}; 
+
+uint32_t frame_wait_time;
+uint32_t previous_frame_time = 0; 
 
 void setup(void) {
     frame_buffer = (uint32_t*)malloc((sizeof(uint32_t)) * (window_width * window_height)); 
@@ -123,6 +128,16 @@ void cleanup(void) {
     SDL_Quit();
 }
 void update(void) {
+    int wait_time = frame_time - (SDL_GetTicks() - previous_frame_time); 
+    frame_wait_time = wait_time; // just a global copy of local wait time, servers no purpose
+
+    if (wait_time > 0 && wait_time <= frame_time) {
+        SDL_Delay(wait_time); 
+    }
+
+    previous_frame_time = SDL_GetTicks(); 
+
+
     rotation.y += 0.01; 
     rotation.x += 0.01; 
     rotation.z += 0.01; 
@@ -132,6 +147,7 @@ void update(void) {
         vec2_t point_2d = get_projection_2d(rotated_point); 
         projected_points[i] = point_2d;
     }
+
 }
 
 int main(void) {
@@ -144,6 +160,7 @@ int main(void) {
         handle_input(); 
         update();
         render_window(); 
+        printf("wait time: %d\n", frame_wait_time);
     }
 
     cleanup(); 
