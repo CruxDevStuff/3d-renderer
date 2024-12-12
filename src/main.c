@@ -32,25 +32,41 @@ void create_point_cloud(void) {
     }
 }
 
-vec3_t get_rotated_point(vec3_t point, vec3_t rotation) {
+/*
+MATH behind rotation: 
+double angle formulas of COS and SIN 
+idea of rotating in 3D: lock the axis you are rotating around(dont change anything in that axis) 
+and consider the remaining 2 axis as relative X and Y axis and do 2D rotation using a double angle formulas.
+*/
+vec3_t get_rotated_point_z(vec3_t point, vec3_t rotation) {
     vec3_t rotated_z_point = {
-        /*
-        MATH: 
-        double angle formulas of COS and SIN 
-        */
         .x=point.x * cos(rotation.z) - point.y * sin(rotation.z),
-        .y=point.y * cos(rotation.z) + point.x * sin(rotation.z),
+        .y=point.x * sin(rotation.z) + point.y * cos(rotation.z),
         .z=point.z
     }; 
-    return rotated_z_point; 
 
-    /*
-    TODO:
-    X and Y rotation 
-    */ 
-    
+    return rotated_z_point;
 }
 
+vec3_t get_rotated_point_y(vec3_t point, vec3_t rotation) {
+    vec3_t rotated_y_point = {
+        .x=point.x * cos(rotation.y) - point.z * sin(rotation.y),
+        .z=point.x * sin(rotation.y) + point.z * cos(rotation.y),
+        .y=point.y
+    }; 
+
+    return rotated_y_point;
+}
+
+vec3_t get_rotated_point_x(vec3_t point, vec3_t rotation) {
+    vec3_t rotated_x_point = {
+        .z=point.z * cos(rotation.x) - point.y * sin(rotation.x),
+        .y=point.z * sin(rotation.x) + point.y * cos(rotation.x),
+        .x=point.x
+    }; 
+
+    return rotated_x_point;
+}
 void handle_input(void) {
     SDL_Event event;
     SDL_PollEvent(&event);
@@ -103,10 +119,14 @@ void update(void) {
     //     vec3_t rotated_point = get_rotated_point(cube_points[i], rotation); 
     //     cube_points[i] = rotated_point; 
     // }
-    rotation.z += 0.001; 
+    rotation.y += 0.01; 
+    rotation.x += 0.01; 
+    rotation.z += 0.01; 
     
     for (int i = 0; i < POINT_N; i++){
-        vec3_t rotated_point = get_rotated_point(cube_points[i], rotation); 
+        vec3_t rotated_point = get_rotated_point_z(cube_points[i], rotation); 
+        rotated_point = get_rotated_point_y(rotated_point, rotation); 
+        rotated_point = get_rotated_point_x(rotated_point, rotation);
         vec2_t point_2d = get_projection_2d(rotated_point); 
         projected_points[i] = point_2d;
     }
