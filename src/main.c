@@ -67,6 +67,15 @@ vec3_t get_rotated_point_x(vec3_t point, vec3_t rotation) {
 
     return rotated_x_point;
 }
+
+vec3_t get_rotated_point(vec3_t point, vec3_t rotation) {
+    // apply rotation in all three axis 
+    vec3_t rotated_point = get_rotated_point_z(point, rotation); 
+    rotated_point = get_rotated_point_y(rotated_point, rotation); 
+    rotated_point = get_rotated_point_x(rotated_point, rotation);
+    return rotated_point; 
+}
+
 void handle_input(void) {
     SDL_Event event;
     SDL_PollEvent(&event);
@@ -114,19 +123,12 @@ void cleanup(void) {
     SDL_Quit();
 }
 void update(void) {
-    // for (int i = 0; i < POINT_N; i++) {
-    //     vec3_t rotation = {.x=1, .y=1, .z=(3.14/2)}; 
-    //     vec3_t rotated_point = get_rotated_point(cube_points[i], rotation); 
-    //     cube_points[i] = rotated_point; 
-    // }
     rotation.y += 0.01; 
     rotation.x += 0.01; 
     rotation.z += 0.01; 
     
     for (int i = 0; i < POINT_N; i++){
-        vec3_t rotated_point = get_rotated_point_z(cube_points[i], rotation); 
-        rotated_point = get_rotated_point_y(rotated_point, rotation); 
-        rotated_point = get_rotated_point_x(rotated_point, rotation);
+        vec3_t rotated_point = get_rotated_point(cube_points[i], rotation); 
         vec2_t point_2d = get_projection_2d(rotated_point); 
         projected_points[i] = point_2d;
     }
