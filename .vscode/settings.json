@@ -2,6 +2,8 @@
     "files.associations": {
         "stdio.h": "c",
         "display.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "vector.h": "c",
+        "main.h": "c"
     }
 }
