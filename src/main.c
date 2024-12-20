@@ -6,9 +6,6 @@ const int FOV_SCALE_FACTOR = 1000;
 const int FPS = 30;
 const int frame_time = (1000 / FPS); 
 
-vec3_t cube_points[POINT_N];
-vec2_t projected_points[POINT_N]; 
-vec2_t projected_vertices[8]; 
 triangle_t projected_triangles[12]; 
 vec3_t camera_position = {.x=0, .y=0, .z=-5}; 
 vec3_t rotation = {.x=0, .y=0, .z=0}; 
@@ -24,19 +21,6 @@ void setup(void) {
     }
 
     frame_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, window_width, window_height); 
-}
-
-void create_point_cloud(void) {
-    int point_idx = 0; 
-    for (float x=-1; x <= 1; x+=0.25) {
-        for (float y=-1; y <= 1; y+=0.25) {
-            for (float z=-1; z <= 1; z+=0.25) {
-                vec3_t new_point = {.x=x, .y=y, .z=z};
-                cube_points[point_idx] = new_point;
-                point_idx += 1; 
-            }
-        }
-    }
 }
 
 void handle_input(void) {
