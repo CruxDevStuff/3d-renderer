@@ -4,6 +4,7 @@
         "display.h": "c",
         "stdlib.h": "c",
         "vector.h": "c",
-        "main.h": "c"
+        "main.h": "c",
+        "triangle.h": "c"
     }
 }

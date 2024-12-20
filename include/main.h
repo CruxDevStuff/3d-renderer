@@ -1,4 +1,5 @@
 #include "display.h"
+#include "mesh.h"
 #include "stdio.h"
 #include "vector.h"
 

@@ -8,6 +8,8 @@ const int frame_time = (1000 / FPS);
 
 vec3_t cube_points[POINT_N];
 vec2_t projected_points[POINT_N]; 
+vec2_t projected_vertices[8]; 
+triangle_t projected_triangles[12]; 
 vec3_t camera_position = {.x=0, .y=0, .z=-5}; 
 vec3_t rotation = {.x=0, .y=0, .z=0}; 
 
@@ -62,16 +64,27 @@ vec2_t get_projection_2d(vec3_t vec3_point) {
     vec3_point.z -= camera_position.z;
     vec2_t point_2d = {.x=(FOV_SCALE_FACTOR * vec3_point.x / vec3_point.z), 
                     .y=(FOV_SCALE_FACTOR * vec3_point.y / vec3_point.z)}; 
+
+    
+    /* 
+    screen origin (0, 0) is at top left while our 3D cartesian space origin (0,0,0) is middle of the screen, 
+    translate all points to account for this offset between world and screen space
+    */
+    point_2d.x += window_width / 2; 
+    point_2d.y += window_height / 2; 
+
     return point_2d;
 }
 
 void render_window(void) {
     // draw_grid(); 
-    // draw_rectangle((window_width/2) - 100, (window_height/2) - 100, 400, 200, 0xFF00FFFF);
-    for (int i = 0; i < POINT_N; i++){
-        draw_rectangle(projected_points[i].x + (window_width / 2), projected_points[i].y + (window_height / 2), 4, 4, 0xFF00FFFF);
-    }
 
+    for (int i = 0; i < 12; i++) {
+        for (int j = 0; j < 3; j++) {
+            draw_rectangle(projected_triangles[i].projected_vertices[j].x, projected_triangles[i].projected_vertices[j].y, 4, 4, 0xFF00FFFF);
+        }
+    }
+    
     update_renderer_texture();
     clear_frame_buffer(0xFF000000); 
     SDL_RenderPresent(renderer);
@@ -98,12 +111,16 @@ void update(void) {
     rotation.x += 0.01; 
     rotation.z += 0.01; 
     
-    for (int i = 0; i < POINT_N; i++){
-        vec3_t rotated_point = get_rotated_point(cube_points[i], rotation); 
-        vec2_t point_2d = get_projection_2d(rotated_point); 
-        projected_points[i] = point_2d;
+    for (int i = 0; i < 12; i++) {
+        vec3_t vertices[3];
+        vertices[0] =  cube_vertices[cube_faces[i].a - 1]; 
+        vertices[1] =  cube_vertices[cube_faces[i].b - 1]; 
+        vertices[2] =  cube_vertices[cube_faces[i].c - 1]; 
+         
+        projected_triangles[i].projected_vertices[0] = get_projection_2d(get_rotated_point(vertices[0], rotation)); 
+        projected_triangles[i].projected_vertices[1] = get_projection_2d(get_rotated_point(vertices[1], rotation)); 
+        projected_triangles[i].projected_vertices[2] = get_projection_2d(get_rotated_point(vertices[2], rotation)); 
     }
-
 }
 
 int main(void) {
