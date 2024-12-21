@@ -13,5 +13,4 @@ typedef struct {
     vec3_t rotation;
 } mesh_t; 
 
-extern mesh_t mesh; 
 #endif 

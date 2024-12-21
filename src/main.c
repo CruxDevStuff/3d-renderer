@@ -2,17 +2,20 @@
 
 const int cube_side = 9; 
 const int POINT_N = cube_side * cube_side * cube_side;
-const int FOV_SCALE_FACTOR = 300; 
+const int FOV_SCALE_FACTOR = 500; 
 const int FPS = 30;
 const int frame_time = (1000 / FPS); 
 
 vec3_t rotation = {.x=0, .y=0, .z=0}; 
-mesh_t main_mesh; 
-triangle_t* triangle_buffer = NULL; // main dynamic array that holds all the trianngles to draw in the render step
 vec3_t camera_position = {.x=0, .y=0, .z=-5}; 
 
 uint32_t frame_wait_time;
 uint32_t previous_frame_time = 0; 
+
+// data in this mesh will rendered every frame, initialized before the game loop
+mesh_t main_mesh; 
+// main dynamic array that holds all the trianngles to draw in the render step
+triangle_t* triangle_buffer = NULL; 
 
 void setup(void) {
     frame_buffer = (uint32_t*)malloc((sizeof(uint32_t)) * (window_width * window_height)); 
@@ -21,22 +24,10 @@ void setup(void) {
     }
 
     frame_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, window_width, window_height); 
-
-    // load cube data, just for testing
-    for (int i = 0; i < 12; i++) {
-        array_push(mesh.faces, cube_faces[i]); 
-    }
-    for (int i = 0; i < 8; i++) {
-        array_push(mesh.vertices, cube_vertices[i]); 
-    } 
-    main_mesh.rotation = rotation; 
 }
 
 mesh_t* load_obj_file(char *filename) {
-    // TODO: allocate this on the heap
     mesh_t* mesh = (mesh_t*)malloc(sizeof(mesh_t)); 
-    // mesh = NULL;
-    mesh_t _mesh; 
     FILE* f_ptr;  
 
     f_ptr = fopen(filename, "r"); 
@@ -67,8 +58,7 @@ mesh_t* load_obj_file(char *filename) {
             point.x = atof(token_values[1]); 
             point.y = atof(token_values[2]); 
             point.z = atof(token_values[3]); 
-            array_push(main_mesh.vertices, point); 
-
+            array_push(mesh->vertices, point); 
         } 
         // handle face data
         else if (read_line[0] == 'f') {
@@ -77,12 +67,11 @@ mesh_t* load_obj_file(char *filename) {
             face.a = atoi(strtok(token_values[1], "/")); 
             face.b = atoi(strtok(token_values[2], "/")); 
             face.c = atoi(strtok(token_values[3], "/")); 
-            array_push(main_mesh.faces, face); 
+            array_push(mesh->faces, face); 
         }
     }
 
     fclose(f_ptr); 
-    // *mesh = _mesh; 
     return mesh; 
 }
 
@@ -155,8 +144,8 @@ void update(void) {
     triangle_t _triangle; 
     int mesh_face_count = array_length(main_mesh.faces); 
 
-    main_mesh.rotation.y += 0.01; 
-    // main_mesh.rotation.x += 0.01; 
+    main_mesh.rotation.y = 3.14/2; 
+    main_mesh.rotation.x += 0.01; 
     main_mesh.rotation.z = 3.14; 
 
     for (int i = 0; i < mesh_face_count; i++) {
@@ -182,8 +171,13 @@ int main(int argc, char* argv[]) {
 
     running = create_window(); 
     setup(); 
-    load_obj_file(argv[1]); 
-    // return 0; 
+
+    mesh_t *model = load_obj_file(argv[1]); 
+
+    if (model != NULL) {
+        main_mesh = *model;
+    }
+   
     while (running) {
         handle_input(); 
         update();
