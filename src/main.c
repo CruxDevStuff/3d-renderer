@@ -2,7 +2,7 @@
 
 const int cube_side = 9; 
 const int POINT_N = cube_side * cube_side * cube_side;
-const int FOV_SCALE_FACTOR = 1000; 
+const int FOV_SCALE_FACTOR = 600; 
 const int FPS = 30;
 const int frame_time = (1000 / FPS); 
 
@@ -60,45 +60,11 @@ vec2_t get_projection_2d(vec3_t vec3_point) {
     return point_2d;
 }
 
-void draw_line(vec2_t p0, vec2_t p1) {
-    int delta_x = p1.x - p0.x; 
-    int delta_y = p1.y - p0.y; 
-
-    /*
-    MATH:
-    compute x and y step size and direction by dividing dx and dx by largest side(dx or dy).
-    by dynamically choosing largest side/base you increase the precision of increments of the smaller side instead of always dividing y over x to get step size.
-    this approach makes drawing steep lines more precise.
-    */
-
-    int largest_side_length = abs(delta_x) >= abs(delta_y) ? abs(delta_x) : abs(delta_y); 
-    // int side_length = abs(delta_x); // uncomment to see why dynamic side selection is better
-    float inc_x = delta_x / (float)largest_side_length; 
-    float inc_y = delta_y / (float)largest_side_length; 
-
-    vec2_t current_point = p0;
-
-    for (int i = 0; i < largest_side_length; i++) {
-        draw_pixel(round(current_point.x), round(current_point.y), 0xFF00FF00); 
-        current_point.x += inc_x; 
-        current_point.y += inc_y; 
-    }
-    
-    // printf("step size: x: %f, y:%f side length:%d\n", inc_x, inc_y, side_length); 
-}
-
 void render_window(void) {
     // draw_grid(); 
 
     for (int i = 0; i < 12; i++) {
-        // draw the projected vertices
-        draw_rectangle(projected_triangles[i].projected_vertices[0].x, projected_triangles[i].projected_vertices[0].y, 4, 4, 0xFFFF0000);
-        draw_rectangle(projected_triangles[i].projected_vertices[1].x, projected_triangles[i].projected_vertices[1].y, 4, 4, 0xFFFF0000);
-        draw_rectangle(projected_triangles[i].projected_vertices[2].x, projected_triangles[i].projected_vertices[2].y, 4, 4, 0xFFFF0000);
-        // draw lines between projected vertices
-        draw_line(projected_triangles[i].projected_vertices[0], projected_triangles[i].projected_vertices[1]); 
-        draw_line(projected_triangles[i].projected_vertices[1], projected_triangles[i].projected_vertices[2]); 
-        draw_line(projected_triangles[i].projected_vertices[2], projected_triangles[i].projected_vertices[0]); 
+        draw_traingle(projected_triangles[i]); 
     }
     
     update_renderer_texture();
