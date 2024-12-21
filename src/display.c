@@ -97,7 +97,7 @@ void draw_line(vec2_t p0, vec2_t p1) {
     // printf("step size: x: %f, y:%f side length:%d\n", inc_x, inc_y, side_length); 
 }
 
-void draw_traingle(triangle_t triangle) {
+void draw_triangle(triangle_t triangle) {
     // draw vertices
     draw_rectangle(triangle.projected_vertices[0].x, triangle.projected_vertices[0].y, 4, 4, 0xFFFF0000);
     draw_rectangle(triangle.projected_vertices[1].x, triangle.projected_vertices[1].y, 4, 4, 0xFFFF0000);

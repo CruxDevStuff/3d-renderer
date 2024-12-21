@@ -7,6 +7,7 @@ const int FPS = 30;
 const int frame_time = (1000 / FPS); 
 
 triangle_t projected_triangles[12]; 
+triangle_t* triangle_buffer = NULL; 
 vec3_t camera_position = {.x=0, .y=0, .z=-5}; 
 vec3_t rotation = {.x=0, .y=0, .z=0}; 
 
@@ -21,6 +22,14 @@ void setup(void) {
     }
 
     frame_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, window_width, window_height); 
+
+    // load cube data, just for testing
+    for (int i = 0; i < 12; i++) {
+        array_push(mesh.faces, cube_faces[i]); 
+    }
+    for (int i = 0; i < 8; i++) {
+        array_push(mesh.vertices, cube_vertices[i]); 
+    } 
 }
 
 void handle_input(void) {
@@ -60,13 +69,13 @@ vec2_t get_projection_2d(vec3_t vec3_point) {
     return point_2d;
 }
 
-void render_window(void) {
-    // draw_grid(); 
-
-    for (int i = 0; i < 12; i++) {
-        draw_traingle(projected_triangles[i]); 
+void render(void) {
+    int triangle_count = array_length(triangle_buffer); 
+    for (int i = 0; i < triangle_count; i++) {
+        draw_triangle(triangle_buffer[i]); 
     }
-    
+
+    array_free(triangle_buffer); 
     update_renderer_texture();
     clear_frame_buffer(0xFF000000); 
     SDL_RenderPresent(renderer);
@@ -81,30 +90,32 @@ void cleanup(void) {
 void update(void) {
     int wait_time = frame_time - (SDL_GetTicks() - previous_frame_time); 
     frame_wait_time = wait_time; // just a global copy of local wait time, servers no purpose
-
     if (wait_time > 0 && wait_time <= frame_time) {
         SDL_Delay(wait_time); 
     }
-
     previous_frame_time = SDL_GetTicks(); 
 
 
-    rotation.y += 0.01; 
-    rotation.x += 0.01; 
-    rotation.z += 0.01; 
-    
-    vec3_t p0 = {.x=0, .y=0, .z=0}; 
-    vec3_t p1 = {.x=20, .y=20, .z=20}; 
+    triangle_buffer = NULL; 
+    triangle_t _triangle; 
+    int mesh_face_count = array_length(mesh.faces); 
 
-    for (int i = 0; i < 12; i++) {
+    mesh.rotation.y += 0.01; 
+    mesh.rotation.x += 0.01; 
+    mesh.rotation.z += 0.01; 
+
+    // project the mesh and update the triangle draw buffer
+    for (int i = 0; i < mesh_face_count; i++) {
         vec3_t vertices[3];
-        vertices[0] =  cube_vertices[cube_faces[i].a - 1]; 
-        vertices[1] =  cube_vertices[cube_faces[i].b - 1]; 
-        vertices[2] =  cube_vertices[cube_faces[i].c - 1]; 
-         
-        projected_triangles[i].projected_vertices[0] = get_projection_2d(get_rotated_point(vertices[0], rotation)); 
-        projected_triangles[i].projected_vertices[1] = get_projection_2d(get_rotated_point(vertices[1], rotation)); 
-        projected_triangles[i].projected_vertices[2] = get_projection_2d(get_rotated_point(vertices[2], rotation)); 
+        vertices[0] =  mesh.vertices[mesh.faces[i].a - 1]; 
+        vertices[1] =  mesh.vertices[mesh.faces[i].b - 1]; 
+        vertices[2] =  mesh.vertices[mesh.faces[i].c - 1]; 
+
+        _triangle.projected_vertices[0] = get_projection_2d(get_rotated_point(vertices[0], mesh.rotation)); 
+        _triangle.projected_vertices[1] = get_projection_2d(get_rotated_point(vertices[1], mesh.rotation)); 
+        _triangle.projected_vertices[2] = get_projection_2d(get_rotated_point(vertices[2], mesh.rotation)); 
+
+        array_push(triangle_buffer, _triangle); 
     }
 }
 
@@ -116,7 +127,7 @@ int main(void) {
     while (running) {
         handle_input(); 
         update();
-        render_window(); 
+        render(); 
         // printf("wait time: %d\n", frame_wait_time);
     }
 

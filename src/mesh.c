@@ -1,5 +1,7 @@
 #include "mesh.h"
 
+mesh_t mesh;
+
 vec3_t cube_vertices[8] = {
     {.x=-1, .y=-1, .z=-1}, 
     {.x=-1, .y= 1, .z=-1}, 

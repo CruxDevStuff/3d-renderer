@@ -20,7 +20,7 @@ void draw_grid(void);
 void draw_pixel(int x, int y, uint32_t color); 
 void draw_rectangle(int x, int y, int width, int height, uint32_t color);
 void draw_line(vec2_t p0, vec2_t p1); 
-void draw_traingle(triangle_t triangle); 
+void draw_triangle(triangle_t triangle); 
 void update_renderer_texture(void);
 
 #endif
