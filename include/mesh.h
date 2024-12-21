@@ -2,6 +2,7 @@
 #define MESH_H
 #include "vector.h" 
 #include "triangle.h"
+#include "stdlib.h"
 
 vec3_t cube_vertices[8];
 face_t cube_faces[12]; 

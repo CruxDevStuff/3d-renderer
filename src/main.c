@@ -2,21 +2,20 @@
 
 const int cube_side = 9; 
 const int POINT_N = cube_side * cube_side * cube_side;
-const int FOV_SCALE_FACTOR = 600; 
+const int FOV_SCALE_FACTOR = 300; 
 const int FPS = 30;
 const int frame_time = (1000 / FPS); 
 
-triangle_t projected_triangles[12]; 
-triangle_t* triangle_buffer = NULL; 
-vec3_t camera_position = {.x=0, .y=0, .z=-5}; 
 vec3_t rotation = {.x=0, .y=0, .z=0}; 
+mesh_t main_mesh; 
+triangle_t* triangle_buffer = NULL; // main dynamic array that holds all the trianngles to draw in the render step
+vec3_t camera_position = {.x=0, .y=0, .z=-5}; 
 
 uint32_t frame_wait_time;
 uint32_t previous_frame_time = 0; 
 
 void setup(void) {
     frame_buffer = (uint32_t*)malloc((sizeof(uint32_t)) * (window_width * window_height)); 
-
     if (frame_buffer == NULL) {
         return;
     }
@@ -30,6 +29,61 @@ void setup(void) {
     for (int i = 0; i < 8; i++) {
         array_push(mesh.vertices, cube_vertices[i]); 
     } 
+    main_mesh.rotation = rotation; 
+}
+
+mesh_t* load_obj_file(char *filename) {
+    // TODO: allocate this on the heap
+    mesh_t* mesh = (mesh_t*)malloc(sizeof(mesh_t)); 
+    // mesh = NULL;
+    mesh_t _mesh; 
+    FILE* f_ptr;  
+
+    f_ptr = fopen(filename, "r"); 
+    char read_line[500]; 
+
+    if (f_ptr == NULL) {
+        printf("ERROR: FAILED TO LOAD FILE"); 
+        return mesh; // return empty mesh
+    }
+
+    // read lines and parse lines
+    while (fgets(read_line, sizeof(read_line), f_ptr) != NULL) {
+        char* token = strtok(read_line, " ");
+        int i = 0; 
+        char **token_values[10]; 
+
+        while (token != NULL) {
+            token_values[i] = token; 
+            token = strtok(NULL, " ");
+            i += 1;
+        }
+
+        char *id = token_values[0]; 
+
+        // handle vertex data
+        if (!strcmp(id, "v")) {
+            vec3_t point;
+            point.x = atof(token_values[1]); 
+            point.y = atof(token_values[2]); 
+            point.z = atof(token_values[3]); 
+            array_push(main_mesh.vertices, point); 
+
+        } 
+        // handle face data
+        else if (read_line[0] == 'f') {
+            face_t face; 
+            // set vertex indices
+            face.a = atoi(strtok(token_values[1], "/")); 
+            face.b = atoi(strtok(token_values[2], "/")); 
+            face.c = atoi(strtok(token_values[3], "/")); 
+            array_push(main_mesh.faces, face); 
+        }
+    }
+
+    fclose(f_ptr); 
+    // *mesh = _mesh; 
+    return mesh; 
 }
 
 void handle_input(void) {
@@ -83,6 +137,7 @@ void render(void) {
 
 void cleanup(void) {
     free(frame_buffer);
+    free(triangle_buffer); 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
@@ -98,32 +153,37 @@ void update(void) {
 
     triangle_buffer = NULL; 
     triangle_t _triangle; 
-    int mesh_face_count = array_length(mesh.faces); 
+    int mesh_face_count = array_length(main_mesh.faces); 
 
-    mesh.rotation.y += 0.01; 
-    mesh.rotation.x += 0.01; 
-    mesh.rotation.z += 0.01; 
+    main_mesh.rotation.y += 0.01; 
+    // main_mesh.rotation.x += 0.01; 
+    main_mesh.rotation.z = 3.14; 
 
-    // project the mesh and update the triangle draw buffer
     for (int i = 0; i < mesh_face_count; i++) {
         vec3_t vertices[3];
-        vertices[0] =  mesh.vertices[mesh.faces[i].a - 1]; 
-        vertices[1] =  mesh.vertices[mesh.faces[i].b - 1]; 
-        vertices[2] =  mesh.vertices[mesh.faces[i].c - 1]; 
+        vertices[0] =  main_mesh.vertices[main_mesh.faces[i].a - 1]; 
+        vertices[1] =  main_mesh.vertices[main_mesh.faces[i].b - 1]; 
+        vertices[2] =  main_mesh.vertices[main_mesh.faces[i].c - 1]; 
 
-        _triangle.projected_vertices[0] = get_projection_2d(get_rotated_point(vertices[0], mesh.rotation)); 
-        _triangle.projected_vertices[1] = get_projection_2d(get_rotated_point(vertices[1], mesh.rotation)); 
-        _triangle.projected_vertices[2] = get_projection_2d(get_rotated_point(vertices[2], mesh.rotation)); 
+        _triangle.projected_vertices[0] = get_projection_2d(get_rotated_point(vertices[0], main_mesh.rotation)); 
+        _triangle.projected_vertices[1] = get_projection_2d(get_rotated_point(vertices[1], main_mesh.rotation)); 
+        _triangle.projected_vertices[2] = get_projection_2d(get_rotated_point(vertices[2], main_mesh.rotation)); 
 
         array_push(triangle_buffer, _triangle); 
     }
 }
 
-int main(void) {
+int main(int argc, char* argv[]) {
+    if (argc <= 1) {
+        printf("NO PATH TO OBJ FILE... EXITING: argc: %d", argc); 
+        cleanup(); 
+        return 0; 
+    }
+
     running = create_window(); 
-
     setup(); 
-
+    load_obj_file(argv[1]); 
+    // return 0; 
     while (running) {
         handle_input(); 
         update();

@@ -3,6 +3,7 @@
 #include "stdio.h"
 #include "vector.h"
 #include "array.h"
+#include "string.h"
 
 bool running = false; 
 void setup(void); 
