@@ -8,6 +8,7 @@ typedef struct {
 
 typedef struct {
     vec2_t projected_vertices[3];
+    vec2_t projected_normal; 
 } triangle_t; 
 
 #endif

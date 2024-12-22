@@ -12,6 +12,8 @@ vec3_t origin = {.x=0, .y=0, .z=0};
 uint32_t frame_wait_time;
 uint32_t previous_frame_time = 0; 
 
+bool draw_face_normals = false; // flag to control drawing surface normals  
+
 // data in this mesh will rendered every frame, initialized before the game loop
 mesh_t main_mesh; 
 // main dynamic array that holds all the triangles to draw in the render step
@@ -66,6 +68,11 @@ void render(void) {
     int triangle_count = array_length(triangle_buffer); 
     for (int i = 0; i < triangle_count; i++) {
         draw_triangle(triangle_buffer[i]); 
+
+        // draw normal line if enabled 
+        if (draw_face_normals) {
+            draw_line(triangle_buffer[i].projected_vertices[0], triangle_buffer[i].projected_normal); 
+        }
     }
 
     array_free(triangle_buffer); 
@@ -125,14 +132,14 @@ void update(void) {
 
         float scalar_projection = get_dotproduct(cam_to_face_ray, face_normal); 
 
-        if (scalar_projection < 0) {
+        if (scalar_projection <= 0) {
             continue;
         }
 
         _triangle.projected_vertices[0] = get_projection_2d(vertices[0]); 
         _triangle.projected_vertices[1] = get_projection_2d(vertices[1]); 
         _triangle.projected_vertices[2] = get_projection_2d(vertices[2]); 
-
+        _triangle.projected_normal = get_projection_2d(add_vec3(div_vec3(face_normal, 2), vertices[0])); 
         array_push(triangle_buffer, _triangle); 
     }
 }
