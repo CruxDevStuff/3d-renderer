@@ -31,6 +31,54 @@ face_t cube_faces[12] = {
     {.a=6, .b=1, .c=4}
 }; 
 
+mesh_t* load_obj_file(char *filename) {
+    mesh_t* mesh = (mesh_t*)malloc(sizeof(mesh_t)); 
+    FILE* f_ptr;  
+
+    f_ptr = fopen(filename, "r"); 
+    char read_line[500]; 
+
+    if (f_ptr == NULL) {
+        printf("ERROR: FAILED TO LOAD FILE"); 
+        return mesh; // return empty mesh
+    }
+
+    // parse file. only vertices and face data for now
+    while (fgets(read_line, sizeof(read_line), f_ptr) != NULL) {
+        char *token = strtok(read_line, " ");
+        char **token_values[10]; 
+
+        int i = 0; 
+        while (token != NULL) {
+            token_values[i] = token; 
+            token = strtok(NULL, " ");
+            i += 1;
+        }
+
+        char *id = token_values[0]; 
+
+        // handle vertex data
+        if (!strcmp(id, "v")) {
+            vec3_t point;
+            point.x = atof(token_values[1]); 
+            point.y = atof(token_values[2]); 
+            point.z = atof(token_values[3]); 
+            array_push(mesh->vertices, point); 
+        } 
+        // handle face data
+        else if (!strcmp(id, "f")) {
+            face_t face; 
+            // set vertex indices
+            face.a = atoi(strtok(token_values[1], "/")); 
+            face.b = atoi(strtok(token_values[2], "/")); 
+            face.c = atoi(strtok(token_values[3], "/")); 
+            array_push(mesh->faces, face); 
+        }
+    }
+
+    fclose(f_ptr); 
+    return mesh; 
+}
 
 
 

@@ -26,55 +26,6 @@ void setup(void) {
     frame_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, window_width, window_height); 
 }
 
-mesh_t* load_obj_file(char *filename) {
-    mesh_t* mesh = (mesh_t*)malloc(sizeof(mesh_t)); 
-    FILE* f_ptr;  
-
-    f_ptr = fopen(filename, "r"); 
-    char read_line[500]; 
-
-    if (f_ptr == NULL) {
-        printf("ERROR: FAILED TO LOAD FILE"); 
-        return mesh; // return empty mesh
-    }
-
-    // read lines and parse lines
-    while (fgets(read_line, sizeof(read_line), f_ptr) != NULL) {
-        char* token = strtok(read_line, " ");
-        int i = 0; 
-        char **token_values[10]; 
-
-        while (token != NULL) {
-            token_values[i] = token; 
-            token = strtok(NULL, " ");
-            i += 1;
-        }
-
-        char *id = token_values[0]; 
-
-        // handle vertex data
-        if (!strcmp(id, "v")) {
-            vec3_t point;
-            point.x = atof(token_values[1]); 
-            point.y = atof(token_values[2]); 
-            point.z = atof(token_values[3]); 
-            array_push(mesh->vertices, point); 
-        } 
-        // handle face data
-        else if (read_line[0] == 'f') {
-            face_t face; 
-            // set vertex indices
-            face.a = atoi(strtok(token_values[1], "/")); 
-            face.b = atoi(strtok(token_values[2], "/")); 
-            face.c = atoi(strtok(token_values[3], "/")); 
-            array_push(mesh->faces, face); 
-        }
-    }
-
-    fclose(f_ptr); 
-    return mesh; 
-}
-
 void handle_input(void) {
     SDL_Event event;
     SDL_PollEvent(&event);

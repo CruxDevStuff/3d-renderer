@@ -3,6 +3,9 @@
 #include "vector.h" 
 #include "triangle.h"
 #include "stdlib.h"
+#include "stdio.h"
+#include "array.h"
+#include "string.h"
 
 vec3_t cube_vertices[8];
 face_t cube_faces[12]; 
@@ -13,4 +16,5 @@ typedef struct {
     vec3_t rotation;
 } mesh_t; 
 
+mesh_t* load_obj_file(char *filename); 
 #endif 
