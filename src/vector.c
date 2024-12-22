@@ -75,10 +75,12 @@ vec3_t sub_vec3(vec3_t a, vec3_t b) {
 
 vec2_t mul_vec2(vec2_t vec, float scale) {
     vec2_t result = {.x=vec.x * scale, .y=vec.y * scale}; 
+    return result; 
 }
 
 vec2_t div_vec2(vec2_t vec, float scale) {
     vec2_t result = {.x=vec.x / scale, .y=vec.y / scale}; 
+    return result; 
 }
 
 vec3_t mul_vec3(vec3_t vec, float scale) {
@@ -98,6 +100,10 @@ vec3_t get_crossproduct(vec3_t a, vec3_t b) {
         .z = (a.x * b.y) - (a.y * b.x)
     }; 
     return result; 
+}
+
+float get_dotproduct(vec3_t a, vec3_t b) {
+    return ((a.x * b.x) + (a.y * b.y) + (a.z * b.z)); 
 }
 
 void test_vector_ops(void) {

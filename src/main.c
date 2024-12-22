@@ -8,7 +8,7 @@ const int frame_time = (1000 / FPS);
 
 vec3_t rotation = {.x=0, .y=0, .z=0}; 
 vec3_t camera_position = {.x=0, .y=0, .z=-5}; 
-
+vec3_t origin = {.x=0, .y=0, .z=0}; 
 uint32_t frame_wait_time;
 uint32_t previous_frame_time = 0; 
 
@@ -90,7 +90,6 @@ void update(void) {
     }
     previous_frame_time = SDL_GetTicks(); 
 
-
     triangle_buffer = NULL; 
     triangle_t _triangle; 
     int mesh_face_count = array_length(main_mesh.faces); 
@@ -101,13 +100,24 @@ void update(void) {
 
     for (int i = 0; i < mesh_face_count; i++) {
         vec3_t vertices[3];
-        vertices[0] =  main_mesh.vertices[main_mesh.faces[i].a - 1]; 
-        vertices[1] =  main_mesh.vertices[main_mesh.faces[i].b - 1]; 
-        vertices[2] =  main_mesh.vertices[main_mesh.faces[i].c - 1]; 
+        vertices[0] =  get_rotated_point(main_mesh.vertices[main_mesh.faces[i].a - 1], main_mesh.rotation);
+        vertices[1] =  get_rotated_point(main_mesh.vertices[main_mesh.faces[i].b - 1], main_mesh.rotation);
+        vertices[2] =  get_rotated_point(main_mesh.vertices[main_mesh.faces[i].c - 1], main_mesh.rotation); 
 
-        _triangle.projected_vertices[0] = get_projection_2d(get_rotated_point(vertices[0], main_mesh.rotation)); 
-        _triangle.projected_vertices[1] = get_projection_2d(get_rotated_point(vertices[1], main_mesh.rotation)); 
-        _triangle.projected_vertices[2] = get_projection_2d(get_rotated_point(vertices[2], main_mesh.rotation)); 
+        vec3_t ab = sub_vec3(vertices[1], vertices[0]); 
+        vec3_t ac = sub_vec3(vertices[2], vertices[0]); 
+        vec3_t cam_to_face_ray = sub_vec3(vertices[0], camera_position);
+
+        vec3_t face_normal = get_crossproduct(ac, ab); 
+        float dot_product = get_dotproduct(cam_to_face_ray, face_normal); 
+
+        if (dot_product < 0) {
+            continue;
+        }
+
+        _triangle.projected_vertices[0] = get_projection_2d(vertices[0]); 
+        _triangle.projected_vertices[1] = get_projection_2d(vertices[1]); 
+        _triangle.projected_vertices[2] = get_projection_2d(vertices[2]); 
 
         array_push(triangle_buffer, _triangle); 
     }
@@ -131,6 +141,9 @@ int main(int argc, char* argv[]) {
         main_mesh = *model;
     }
    
+    // main_mesh.faces = cube_faces;
+    // main_mesh.vertices = cube_vertices;
+
     while (running) {
         handle_input(); 
         update();
