@@ -7,14 +7,14 @@ const int FPS = 30;
 const int frame_time = (1000 / FPS); 
 
 vec3_t rotation = {.x=0, .y=0, .z=0}; 
-vec3_t camera_position = {.x=0, .y=0, .z=-5}; 
+vec3_t camera_position = {.x=0, .y=0, .z=0}; 
 vec3_t origin = {.x=0, .y=0, .z=0}; 
 uint32_t frame_wait_time;
 uint32_t previous_frame_time = 0; 
 
 // data in this mesh will rendered every frame, initialized before the game loop
 mesh_t main_mesh; 
-// main dynamic array that holds all the trianngles to draw in the render step
+// main dynamic array that holds all the triangles to draw in the render step
 triangle_t* triangle_buffer = NULL; 
 
 void setup(void) {
@@ -48,7 +48,6 @@ vec2_t get_projection_2d(vec3_t vec3_point) {
     find projected value of X and Y on screen 
     using a property of similar triangles(the ratios of their sides are equal) 
     */
-    vec3_point.z -= camera_position.z;
     vec2_t point_2d = {.x=(FOV_SCALE_FACTOR * vec3_point.x / vec3_point.z), 
                     .y=(FOV_SCALE_FACTOR * vec3_point.y / vec3_point.z)}; 
 
@@ -100,18 +99,33 @@ void update(void) {
 
     for (int i = 0; i < mesh_face_count; i++) {
         vec3_t vertices[3];
+        // rotate vertices 
         vertices[0] =  get_rotated_point(main_mesh.vertices[main_mesh.faces[i].a - 1], main_mesh.rotation);
         vertices[1] =  get_rotated_point(main_mesh.vertices[main_mesh.faces[i].b - 1], main_mesh.rotation);
         vertices[2] =  get_rotated_point(main_mesh.vertices[main_mesh.faces[i].c - 1], main_mesh.rotation); 
 
+        // translate vertices in z (away from camera in a left hand coordinate system)
+        vertices[0].z += 5; 
+        vertices[1].z += 5; 
+        vertices[2].z += 5; 
+
+        /*
+        BACK FACE CULLING - ONLY RENDER FACES THAT ARE FACING THE CAMERA
+        MATH:
+        Find which faces are visible to the camera by computing 
+        the scalar projection between the normal vector of a face and the 
+        ray from the camera that intresets the face. Only render faces whose 
+        scalar_projetion > 0. Only faces that are less than 90 degree relative to camera frame will satisfy the condition
+        */
         vec3_t ab = sub_vec3(vertices[1], vertices[0]); 
         vec3_t ac = sub_vec3(vertices[2], vertices[0]); 
-        vec3_t cam_to_face_ray = sub_vec3(vertices[0], camera_position);
 
-        vec3_t face_normal = get_crossproduct(ac, ab); 
-        float dot_product = get_dotproduct(cam_to_face_ray, face_normal); 
+        vec3_t cam_to_face_ray = get_normalized_vector(sub_vec3(vertices[0], camera_position)); 
+        vec3_t face_normal = get_normalized_vector(get_crossproduct(ac, ab)); 
 
-        if (dot_product < 0) {
+        float scalar_projection = get_dotproduct(cam_to_face_ray, face_normal); 
+
+        if (scalar_projection < 0) {
             continue;
         }
 

@@ -106,6 +106,12 @@ float get_dotproduct(vec3_t a, vec3_t b) {
     return ((a.x * b.x) + (a.y * b.y) + (a.z * b.z)); 
 }
 
+vec3_t get_normalized_vector(vec3_t vec) {
+    float mag = get_magnitude_vec3(vec); 
+    vec3_t normalized = {.x=vec.x/mag, .y=vec.y/mag, .z=vec.z/mag};
+    return normalized; 
+}
+
 void test_vector_ops(void) {
     // this function is a masterclass on how to write shitty tests
 
@@ -132,6 +138,4 @@ void test_vector_ops(void) {
 
     result3 = get_crossproduct(a, b); 
     printf("CROSS PRODUCT vec3: x: %f y: %f, z: %f\n", result3.x, result3.y, result3.z); 
-
-
 }

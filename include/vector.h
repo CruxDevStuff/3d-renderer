@@ -30,5 +30,7 @@ vec3_t sub_vec3(vec3_t a, vec3_t b);
 vec3_t get_crossproduct(vec3_t a, vec3_t b); 
 float get_dotproduct(vec3_t a, vec3_t b);
 
+vec3_t get_normalized_vector(vec3_t vec);
+
 void test_vector_ops(void); 
 #endif 
