@@ -114,6 +114,8 @@ void update(void) {
 }
 
 int main(int argc, char* argv[]) {
+    // test_vector_ops(); 
+
     if (argc <= 1) {
         printf("NO PATH TO OBJ FILE... EXITING: argc: %d", argc); 
         cleanup(); 
