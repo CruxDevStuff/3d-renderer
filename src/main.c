@@ -2,7 +2,7 @@
 
 const int cube_side = 9; 
 const int POINT_N = cube_side * cube_side * cube_side;
-const int FOV_SCALE_FACTOR = 500; 
+const int FOV_SCALE_FACTOR = 900; 
 const int FPS = 30;
 const int frame_time = (1000 / FPS); 
 
@@ -11,8 +11,6 @@ vec3_t camera_position = {.x=0, .y=0, .z=0};
 vec3_t origin = {.x=0, .y=0, .z=0}; 
 uint32_t frame_wait_time;
 uint32_t previous_frame_time = 0; 
-
-bool draw_face_normals = false; // flag to control drawing surface normals  
 
 // data in this mesh will rendered every frame, initialized before the game loop
 mesh_t main_mesh; 
@@ -68,10 +66,10 @@ void render(void) {
     int triangle_count = array_length(triangle_buffer); 
     for (int i = 0; i < triangle_count; i++) {
         draw_triangle(triangle_buffer[i]); 
-
+        fill_triangle(triangle_buffer[i]); 
         // draw normal line if enabled 
-        if (draw_face_normals) {
-            draw_line(triangle_buffer[i].projected_vertices[0], triangle_buffer[i].projected_normal); 
+        if (DRAW_FACE_NOMRALS) {
+            draw_line(triangle_buffer[i].projected_vertices[0], triangle_buffer[i].projected_normal, 0xFF00FF00); 
         }
     }
 
@@ -132,7 +130,7 @@ void update(void) {
 
         float scalar_projection = get_dotproduct(cam_to_face_ray, face_normal); 
 
-        if (scalar_projection <= 0) {
+        if (scalar_projection < 0 && ENABLE_BACKFACE_CULLING) {
             continue;
         }
 

@@ -5,6 +5,12 @@ SDL_Renderer *renderer = NULL;
 uint32_t *frame_buffer = NULL; 
 SDL_Texture *frame_buffer_texture = NULL; 
 
+// FLAGS FOR RENDERING OPTIONS
+bool DRAW_FACE_NOMRALS = false;  
+bool DRAW_VERTICES = false;
+bool DRAW_WIREFRAME = true; 
+bool ENABLE_BACKFACE_CULLING = false; 
+
 bool create_window(void) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         fprintf(stderr, "Failed to initialize SDL: %s\n", SDL_GetError());
@@ -70,7 +76,7 @@ void draw_rectangle(int x, int y, int width, int height, uint32_t color) {
     }
 }
 
-void draw_line(vec2_t p0, vec2_t p1) {
+void draw_line(vec2_t p0, vec2_t p1, uint32_t color) {
     int delta_x = p1.x - p0.x; 
     int delta_y = p1.y - p0.y; 
 
@@ -89,7 +95,7 @@ void draw_line(vec2_t p0, vec2_t p1) {
     vec2_t current_point = p0;
 
     for (int i = 0; i < largest_side_length; i++) {
-        draw_pixel(round(current_point.x), round(current_point.y), 0xFF00FF00); 
+        draw_pixel(round(current_point.x), round(current_point.y), color); 
         current_point.x += inc_x; 
         current_point.y += inc_y; 
     }
@@ -99,13 +105,18 @@ void draw_line(vec2_t p0, vec2_t p1) {
 
 void draw_triangle(triangle_t triangle) {
     // draw vertices
-    draw_rectangle(triangle.projected_vertices[0].x, triangle.projected_vertices[0].y, 4, 4, 0xFFFF0000);
-    draw_rectangle(triangle.projected_vertices[1].x, triangle.projected_vertices[1].y, 4, 4, 0xFFFF0000);
-    draw_rectangle(triangle.projected_vertices[2].x, triangle.projected_vertices[2].y, 4, 4, 0xFFFF0000);
+    if (DRAW_VERTICES) {
+        draw_rectangle(triangle.projected_vertices[0].x, triangle.projected_vertices[0].y, 4, 4, 0xFFFF0000);
+        draw_rectangle(triangle.projected_vertices[1].x, triangle.projected_vertices[1].y, 4, 4, 0xFFFF0000);
+        draw_rectangle(triangle.projected_vertices[2].x, triangle.projected_vertices[2].y, 4, 4, 0xFFFF0000);
+    }
+
     // draw lines between vertices
-    draw_line(triangle.projected_vertices[0], triangle.projected_vertices[1]); 
-    draw_line(triangle.projected_vertices[1], triangle.projected_vertices[2]); 
-    draw_line(triangle.projected_vertices[2], triangle.projected_vertices[0]); 
+    if (DRAW_WIREFRAME) {
+        draw_line(triangle.projected_vertices[0], triangle.projected_vertices[1], 0xFF00FF00); 
+        draw_line(triangle.projected_vertices[1], triangle.projected_vertices[2], 0xFF00FF00); 
+        draw_line(triangle.projected_vertices[2], triangle.projected_vertices[0], 0xFF00FF00); 
+    }
 }
 
 void update_renderer_texture(void) {
