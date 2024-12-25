@@ -80,5 +80,18 @@ mesh_t* load_obj_file(char *filename) {
     return mesh; 
 }
 
+mesh_t *load_cube_data(void) {
+    mesh_t *mesh = (mesh_t*)malloc(sizeof(mesh_t)); 
+    for (int i=0; i < 12; i++) {
+        array_push(mesh->faces, cube_faces[i]); 
+    }
+
+    for (int i=0; i < 8; i++) {
+        array_push(mesh->vertices, cube_vertices[i]); 
+    }
+
+    return mesh;     
+}
+
 
 

@@ -1,6 +1,6 @@
 #include "triangle.h"
 
-void fill_triangle(triangle_t triangle) {
+void fill_triangle(triangle_t triangle, uint32_t color) {
     // sort vertices by y coordinate
     vec2_t vertex_0 = triangle.projected_vertices[0]; 
     vec2_t vertex_1 = triangle.projected_vertices[1]; 
@@ -47,6 +47,7 @@ void fill_triangle(triangle_t triangle) {
         3. vertex_2, 
     */ 
 
+    // draw mid line that divides the triangle 
     // draw_line(vertex_1, mid_point, 0xFF00FF00); 
 
     /*
@@ -56,7 +57,7 @@ void fill_triangle(triangle_t triangle) {
     2. vertex 0(highest y after sorting) as the origin for the lines of the upper triangle
     */
     float upper_dy = vertex_0.y - vertex_1.y; 
-    float u_cur_y = fabsf(upper_dy); 
+    int u_cur_y = fabsf(upper_dy); 
     int u_y_length = fabsf(upper_dy); 
 
     // line 1 constants
@@ -71,13 +72,13 @@ void fill_triangle(triangle_t triangle) {
         // compute relative x and translate to origin 
         float x1 = (u_cur_y / m1) + vertex_0.x; 
         float x2 = (u_cur_y / m2) + vertex_0.x ; 
-        float y = u_cur_y + vertex_0.y; 
+        int y = u_cur_y + vertex_0.y; 
 
         vec2_t start = {.x=x1, .y=y}; 
         vec2_t end = {.x=x2, .y=y}; 
 
         u_cur_y -= 1; // start from y of vertex 0 and decrement to go down
-        draw_line(start, end, 0xFFFFFFFF); 
+        draw_line(start, end, color); 
     }
 
     /*
@@ -101,11 +102,11 @@ void fill_triangle(triangle_t triangle) {
         // compute relative x and translate to origin 
         float x1 = (i / l_m1) + vertex_2.x; 
         float x2 = (i / l_m2) + vertex_2.x; 
-        float y = vertex_2.y - i;  // start from y of vertex 2 and subtract to go up
+        int y = vertex_2.y - i;  // start from y of vertex 2 and subtract to go up
 
         vec2_t start = {.x=x1, .y=y}; 
         vec2_t end = {.x=x2, .y=y}; 
 
-        draw_line(start, end, 0xFFFFFFFF); 
+        draw_line(start, end, color); 
     }
 }

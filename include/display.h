@@ -6,19 +6,28 @@
 #include "SDL.h"
 #include "triangle.h"
 
+typedef struct {
+    bool DRAW_FACE_NORMALS; // flag to control drawing surface normals  
+    bool DRAW_VERTICES;
+    bool DRAW_WIREFRAME; 
+    bool ENABLE_BACKFACE_CULLING; // flag to enable back face culling
+    bool COLOR_FACES; 
+} render_settings_t;
+
 extern SDL_Window *window; 
 extern SDL_Renderer *renderer; 
 extern uint32_t *frame_buffer; 
 extern SDL_Texture *frame_buffer_texture; 
+extern render_settings_t *render_settings; 
 
 int window_height;
 int window_width; 
 
-bool running; 
-bool DRAW_FACE_NOMRALS; // flag to control drawing surface normals  
-bool DRAW_VERTICES;
-bool DRAW_WIREFRAME; 
-bool ENABLE_BACKFACE_CULLING; // flag to enable back face culling
+// bool running; 
+// bool DRAW_FACE_NORMALS; // flag to control drawing surface normals  
+// bool DRAW_VERTICES;
+// bool DRAW_WIREFRAME; 
+// bool ENABLE_BACKFACE_CULLING; // flag to enable back face culling
 
 bool create_window(void);
 void clear_frame_buffer(uint32_t clear_color);

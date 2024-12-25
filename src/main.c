@@ -35,8 +35,27 @@ void handle_input(void) {
             running = false;
             break;
         case SDL_KEYDOWN:
-            if (event.key.keysym.sym == SDLK_ESCAPE){
-                running = false; 
+            switch (event.key.keysym.sym) {
+                case SDLK_ESCAPE:
+                    running = false; 
+                    break;
+                case SDLK_w:
+                    render_settings->DRAW_WIREFRAME = !(render_settings->DRAW_WIREFRAME); 
+                    break; 
+                case SDLK_v:
+                    render_settings->DRAW_VERTICES = !(render_settings->DRAW_VERTICES); 
+                    break; 
+                case SDLK_n:
+                    render_settings->DRAW_FACE_NORMALS = !(render_settings->DRAW_FACE_NORMALS); 
+                    break;
+                case SDLK_b:
+                    render_settings->ENABLE_BACKFACE_CULLING = !(render_settings->ENABLE_BACKFACE_CULLING); 
+                    break;
+                case SDLK_c:
+                    render_settings->COLOR_FACES = !(render_settings->COLOR_FACES); 
+                    break;
+                default:
+                    break;
             }
         default:
             break;
@@ -66,9 +85,14 @@ void render(void) {
     int triangle_count = array_length(triangle_buffer); 
     for (int i = 0; i < triangle_count; i++) {
         draw_triangle(triangle_buffer[i]); 
-        fill_triangle(triangle_buffer[i]); 
+
+        // color triangles if enabled
+        if (render_settings->COLOR_FACES) {
+            fill_triangle(triangle_buffer[i], 0xFF0000FF); 
+        }
+
         // draw normal line if enabled 
-        if (DRAW_FACE_NOMRALS) {
+        if (render_settings->DRAW_FACE_NORMALS) {
             draw_line(triangle_buffer[i].projected_vertices[0], triangle_buffer[i].projected_normal, 0xFF00FF00); 
         }
     }
@@ -130,7 +154,7 @@ void update(void) {
 
         float scalar_projection = get_dotproduct(cam_to_face_ray, face_normal); 
 
-        if (scalar_projection < 0 && ENABLE_BACKFACE_CULLING) {
+        if (scalar_projection < 0 && render_settings->ENABLE_BACKFACE_CULLING) {
             continue;
         }
 
@@ -154,7 +178,8 @@ int main(int argc, char* argv[]) {
     running = create_window(); 
     setup(); 
 
-    mesh_t *model = load_obj_file(argv[1]); 
+    // mesh_t *model = load_obj_file(argv[1]); 
+    mesh_t *model = load_cube_data(); 
 
     if (model != NULL) {
         main_mesh = *model;

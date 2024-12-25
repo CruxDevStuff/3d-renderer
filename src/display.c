@@ -4,6 +4,7 @@ SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL; 
 uint32_t *frame_buffer = NULL; 
 SDL_Texture *frame_buffer_texture = NULL; 
+render_settings_t *render_settings = NULL;
 
 // FLAGS FOR RENDERING OPTIONS
 bool DRAW_FACE_NOMRALS = false;  
@@ -39,6 +40,14 @@ bool create_window(void) {
         SDL_Quit();
         return false;
     }
+    render_settings = (render_settings_t*)malloc(sizeof(render_settings_t));
+
+    // initial rendering state
+    render_settings->DRAW_FACE_NORMALS = false; 
+    render_settings->DRAW_VERTICES = false; 
+    render_settings->ENABLE_BACKFACE_CULLING = true; 
+    render_settings->DRAW_WIREFRAME = true; 
+    render_settings->COLOR_FACES = true; 
 
     return true; 
 }
@@ -105,14 +114,14 @@ void draw_line(vec2_t p0, vec2_t p1, uint32_t color) {
 
 void draw_triangle(triangle_t triangle) {
     // draw vertices
-    if (DRAW_VERTICES) {
+    if (render_settings->DRAW_VERTICES) {
         draw_rectangle(triangle.projected_vertices[0].x, triangle.projected_vertices[0].y, 4, 4, 0xFFFF0000);
         draw_rectangle(triangle.projected_vertices[1].x, triangle.projected_vertices[1].y, 4, 4, 0xFFFF0000);
         draw_rectangle(triangle.projected_vertices[2].x, triangle.projected_vertices[2].y, 4, 4, 0xFFFF0000);
     }
 
     // draw lines between vertices
-    if (DRAW_WIREFRAME) {
+    if (render_settings->DRAW_WIREFRAME) {
         draw_line(triangle.projected_vertices[0], triangle.projected_vertices[1], 0xFF00FF00); 
         draw_line(triangle.projected_vertices[1], triangle.projected_vertices[2], 0xFF00FF00); 
         draw_line(triangle.projected_vertices[2], triangle.projected_vertices[0], 0xFF00FF00); 

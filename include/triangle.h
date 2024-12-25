@@ -23,5 +23,5 @@ triangle_t simple_triangle;
 
 #include "display.h"
 
-void fill_triangle(triangle_t triangle); 
+void fill_triangle(triangle_t triangle, uint32_t color); 
 #endif

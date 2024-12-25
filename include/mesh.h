@@ -17,4 +17,5 @@ typedef struct {
 } mesh_t; 
 
 mesh_t* load_obj_file(char *filename); 
+mesh_t* load_cube_data(void); 
 #endif 
