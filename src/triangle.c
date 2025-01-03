@@ -48,7 +48,7 @@ void fill_triangle(triangle_t triangle, uint32_t color) {
     */ 
 
     // draw mid line that divides the triangle 
-    // draw_line(vertex_1, mid_point, 0xFF00FF00); 
+    // draw_line(vertex_1, mid_point, 0xFFFFA500); 
 
     /*
     MATH:

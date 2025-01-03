@@ -84,12 +84,13 @@ vec2_t get_projection_2d(vec3_t vec3_point) {
 void render(void) {
     int triangle_count = array_length(triangle_buffer); 
     for (int i = 0; i < triangle_count; i++) {
-        draw_triangle(triangle_buffer[i]); 
-
-        // color triangles if enabled
+        // fill triange 
         if (render_settings->COLOR_FACES) {
-            fill_triangle(triangle_buffer[i], 0xFF0000FF); 
+            fill_triangle(triangle_buffer[i], triangle_buffer[i].color); 
         }
+        // draw vertices on top of filled triangles
+        draw_triangle(triangle_buffer[i]); 
+        
 
         // draw normal line if enabled 
         if (render_settings->DRAW_FACE_NORMALS) {
@@ -122,9 +123,12 @@ void update(void) {
     triangle_t _triangle; 
     int mesh_face_count = array_length(main_mesh.faces); 
 
-    main_mesh.rotation.y = 3.14/2; 
+    // main_mesh.rotation.y = 3.14/2; 
+    // main_mesh.rotation.x += 0.01; 
+    // main_mesh.rotation.z = 3.14; 
+    main_mesh.rotation.y += 0.01; 
     main_mesh.rotation.x += 0.01; 
-    main_mesh.rotation.z = 3.14; 
+    main_mesh.rotation.z += 0.01; 
 
     for (int i = 0; i < mesh_face_count; i++) {
         vec3_t vertices[3];
@@ -162,6 +166,7 @@ void update(void) {
         _triangle.projected_vertices[1] = get_projection_2d(vertices[1]); 
         _triangle.projected_vertices[2] = get_projection_2d(vertices[2]); 
         _triangle.projected_normal = get_projection_2d(add_vec3(div_vec3(face_normal, 2), vertices[0])); 
+        _triangle.color = main_mesh.faces[i].color;
         array_push(triangle_buffer, _triangle); 
     }
 }
