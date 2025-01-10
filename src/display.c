@@ -46,7 +46,7 @@ bool create_window(void) {
     render_settings->DRAW_FACE_NORMALS = false; 
     render_settings->DRAW_VERTICES = false; 
     render_settings->ENABLE_BACKFACE_CULLING = true; 
-    render_settings->DRAW_WIREFRAME = true; 
+    render_settings->DRAW_WIREFRAME = false; 
     render_settings->COLOR_FACES = true; 
 
     return true; 
@@ -80,12 +80,12 @@ void draw_grid(void) {
 void draw_rectangle(int x, int y, int width, int height, uint32_t color) {
     for (int row=y; row < height+y; row++) {
         for (int column=x; column < width+x; column++) {
-                draw_pixel(column, row, color);
+            draw_pixel(column, row, color);
         }
     }
 }
 
-void draw_line(vec2_t p0, vec2_t p1, uint32_t color) {
+void draw_line(vec2_t p0, vec2_t p1, int thickness, uint32_t color) {
     int delta_x = p1.x - p0.x; 
     int delta_y = p1.y - p0.y; 
 
@@ -104,28 +104,12 @@ void draw_line(vec2_t p0, vec2_t p1, uint32_t color) {
     vec2_t current_point = p0;
 
     for (int i = 0; i < largest_side_length; i++) {
-        draw_pixel(round(current_point.x), round(current_point.y), color); 
+        draw_rectangle(round(current_point.x), round(current_point.y), thickness, thickness, color);  // using draw_rectangle() instead of draw_pixel() here to draw THICCCer lines
         current_point.x += inc_x; 
         current_point.y += inc_y; 
     }
     
     // printf("step size: x: %f, y:%f side length:%d\n", inc_x, inc_y, side_length); 
-}
-
-void draw_triangle(triangle_t triangle) {
-    // draw vertices
-    if (render_settings->DRAW_VERTICES) {
-        draw_rectangle(triangle.projected_vertices[0].x, triangle.projected_vertices[0].y, 4, 4, 0xFFFF0000);
-        draw_rectangle(triangle.projected_vertices[1].x, triangle.projected_vertices[1].y, 4, 4, 0xFFFF0000);
-        draw_rectangle(triangle.projected_vertices[2].x, triangle.projected_vertices[2].y, 4, 4, 0xFFFF0000);
-    }
-
-    // draw lines between vertices
-    if (render_settings->DRAW_WIREFRAME) {
-        draw_line(triangle.projected_vertices[0], triangle.projected_vertices[1], 0xFF00FF00); 
-        draw_line(triangle.projected_vertices[1], triangle.projected_vertices[2], 0xFF00FF00); 
-        draw_line(triangle.projected_vertices[2], triangle.projected_vertices[0], 0xFF00FF00); 
-    }
 }
 
 void update_renderer_texture(void) {

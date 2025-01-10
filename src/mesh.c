@@ -72,6 +72,7 @@ mesh_t* load_obj_file(char *filename) {
             face.a = atoi(strtok(token_values[1], "/")); 
             face.b = atoi(strtok(token_values[2], "/")); 
             face.c = atoi(strtok(token_values[3], "/")); 
+            face.color = 0xFFFFFFFF; // set all faces to white for now
             array_push(mesh->faces, face); 
         }
     }

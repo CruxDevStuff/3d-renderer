@@ -1,5 +1,32 @@
 #include "triangle.h"
 
+triangle_t simple_triangle = {
+   .projected_vertices[0].x = 300,
+   .projected_vertices[0].y = 100,
+
+   .projected_vertices[1].x = 50,
+   .projected_vertices[1].y = 400,
+
+   .projected_vertices[2].x = 500,
+   .projected_vertices[2].y = 700,
+   .color=0xFFFFFFFF
+};
+
+
+void draw_triangle(triangle_t triangle, uint32_t color) {
+    // draw vertices 
+    if (render_settings->DRAW_VERTICES) {
+        draw_rectangle(triangle.projected_vertices[0].x, triangle.projected_vertices[0].y, 4, 4, 0xFFFF0000);
+        draw_rectangle(triangle.projected_vertices[1].x, triangle.projected_vertices[1].y, 4, 4, 0xFFFF0000);
+        draw_rectangle(triangle.projected_vertices[2].x, triangle.projected_vertices[2].y, 4, 4, 0xFFFF0000);
+    }
+
+    // lines between vertices
+    draw_line(triangle.projected_vertices[0], triangle.projected_vertices[1], 2, color); 
+    draw_line(triangle.projected_vertices[1], triangle.projected_vertices[2], 2, color); 
+    draw_line(triangle.projected_vertices[2], triangle.projected_vertices[0], 2, color); 
+}
+
 void fill_triangle(triangle_t triangle, uint32_t color) {
     // sort vertices by y coordinate
     vec2_t vertex_0 = triangle.projected_vertices[0]; 
@@ -47,66 +74,44 @@ void fill_triangle(triangle_t triangle, uint32_t color) {
         3. vertex_2, 
     */ 
 
-    // draw mid line that divides the triangle 
-    // draw_line(vertex_1, mid_point, 0xFFFFA500); 
-
     /*
-    MATH:
     FILL UPPER TRIANGLE
     1. fill from top to bottom
     2. vertex 0(highest y after sorting) as the origin for the lines of the upper triangle
     */
-    float upper_dy = vertex_0.y - vertex_1.y; 
-    int u_cur_y = fabsf(upper_dy); 
-    int u_y_length = fabsf(upper_dy); 
 
-    // line 1 constants
-    int dx1 = vertex_0.x - vertex_1.x;
-    float m1 = upper_dy / dx1; 
+    vec2_t start = {.x=vertex_0.x, .y=vertex_0.y}; 
+    vec2_t end = {.x=vertex_0.x, .y=vertex_0.y}; 
 
-    // line 2 constants
-    int dx2 =  vertex_0.x - mid_point.x;
-    float m2 = upper_dy / dx2; 
+    float u_dx_1 = vertex_0.x - vertex_1.x; 
+    float u_dx_2 = mid_point.x - vertex_0.x;
+    float u_dy = fabsf(vertex_0.y - mid_point.y); 
+    float u_m1 = u_dx_1 / u_dy; 
+    float u_m2 = u_dx_2 / u_dy; 
 
-    for (int i = 0; i < u_y_length; i++) {
-        // compute relative x and translate to origin 
-        float x1 = (u_cur_y / m1) + vertex_0.x; 
-        float x2 = (u_cur_y / m2) + vertex_0.x ; 
-        int y = u_cur_y + vertex_0.y; 
-
-        vec2_t start = {.x=x1, .y=y}; 
-        vec2_t end = {.x=x2, .y=y}; 
-
-        u_cur_y -= 1; // start from y of vertex 0 and decrement to go down
-        draw_line(start, end, color); 
+    for (int i = 0; i < (int)(u_dy); i++) {
+        start.x -= u_m1; start.y += 1; 
+        end.x += u_m2; end.y += 1;
+        draw_line(start, end, 2, color); 
     }
 
     /*
-    MATH:
     FILL LOWER TRIANGLE
     1. fill from bottom to top
     2. vertex 2(lowest y after sorting) as the origin for the lines of the lower triangle
     */
-    float lower_dy = mid_point.y - vertex_2.y; 
-    int l_y_length = fabsf(lower_dy); 
+    start.x = vertex_2.x; start.y = vertex_2.y;
+    end.x = vertex_2.x; end.y = vertex_2.y;
 
-    // constants for line 1
-    int l_dx_1 = vertex_2.x - vertex_1.x; 
-    float l_m1 = lower_dy / l_dx_1; 
+    float l_dx_1 = vertex_2.x - vertex_1.x; 
+    float l_dx_2 = mid_point.x - vertex_2.x;
+    float l_dy = fabsf(vertex_2.y - mid_point.y); 
+    float l_m1 = l_dx_1 / l_dy; 
+    float l_m2 = l_dx_2 / l_dy; 
 
-    // constants for line 2 
-    int l_dx_2 = vertex_2.x - mid_point.x; 
-    float l_m2 = lower_dy / l_dx_2; 
-
-    for (int i = 0; i < l_y_length; i++) {
-        // compute relative x and translate to origin 
-        float x1 = (i / l_m1) + vertex_2.x; 
-        float x2 = (i / l_m2) + vertex_2.x; 
-        int y = vertex_2.y - i;  // start from y of vertex 2 and subtract to go up
-
-        vec2_t start = {.x=x1, .y=y}; 
-        vec2_t end = {.x=x2, .y=y}; 
-
-        draw_line(start, end, color); 
+    for (int i = 0; i < (int)(l_dy); i++) {
+        start.x -= l_m1; start.y -= 1; 
+        end.x += l_m2; end.y -= 1;
+        draw_line(start, end, 2, color); 
     }
 }

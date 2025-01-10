@@ -83,18 +83,26 @@ vec2_t get_projection_2d(vec3_t vec3_point) {
 
 void render(void) {
     int triangle_count = array_length(triangle_buffer); 
-    for (int i = 0; i < triangle_count; i++) {
-        // fill triange 
-        if (render_settings->COLOR_FACES) {
-            fill_triangle(triangle_buffer[i], triangle_buffer[i].color); 
-        }
-        // draw vertices on top of filled triangles
-        draw_triangle(triangle_buffer[i]); 
-        
 
-        // draw normal line if enabled 
+    for (int i = 0; i < triangle_count; i++) {
+        triangle_t cur_triangle = triangle_buffer[i];
+
+        // draw and fill triangle
+        draw_triangle(cur_triangle, cur_triangle.color); 
+        if (render_settings->COLOR_FACES) {
+            fill_triangle(cur_triangle, cur_triangle.color); 
+        }
+
+        // draw wireframe highlight lines
+        if (render_settings->DRAW_WIREFRAME) {
+            draw_line(cur_triangle.projected_vertices[0], cur_triangle.projected_vertices[1], 2, 0xFF000000); 
+            draw_line(cur_triangle.projected_vertices[1], cur_triangle.projected_vertices[2], 2, 0xFF000000); 
+            draw_line(cur_triangle.projected_vertices[2], cur_triangle.projected_vertices[0], 2, 0xFF000000); 
+        }
+
+        // draw normal lines
         if (render_settings->DRAW_FACE_NORMALS) {
-            draw_line(triangle_buffer[i].projected_vertices[0], triangle_buffer[i].projected_normal, 0xFF00FF00); 
+            draw_line(cur_triangle.projected_vertices[0], cur_triangle.projected_normal, 1, 0xFF00FF00); 
         }
     }
 
@@ -129,7 +137,7 @@ void update(void) {
     main_mesh.rotation.y += 0.01; 
     main_mesh.rotation.x += 0.01; 
     main_mesh.rotation.z += 0.01; 
-
+    
     for (int i = 0; i < mesh_face_count; i++) {
         vec3_t vertices[3];
         // rotate vertices 
@@ -183,21 +191,18 @@ int main(int argc, char* argv[]) {
     running = create_window(); 
     setup(); 
 
-    // mesh_t *model = load_obj_file(argv[1]); 
-    mesh_t *model = load_cube_data(); 
+    mesh_t *model = load_obj_file(argv[1]); 
+    // mesh_t *model = load_cube_data(); 
 
     if (model != NULL) {
         main_mesh = *model;
     }
-   
-    // main_mesh.faces = cube_faces;
-    // main_mesh.vertices = cube_vertices;
 
     while (running) {
         handle_input(); 
         update();
         render(); 
-        // printf("wait time: %d\n", frame_wait_time);
+        printf("wait time: %d\n", frame_wait_time);
     }
 
     cleanup(); 

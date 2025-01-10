@@ -23,19 +23,12 @@ extern render_settings_t *render_settings;
 int window_height;
 int window_width; 
 
-// bool running; 
-// bool DRAW_FACE_NORMALS; // flag to control drawing surface normals  
-// bool DRAW_VERTICES;
-// bool DRAW_WIREFRAME; 
-// bool ENABLE_BACKFACE_CULLING; // flag to enable back face culling
-
 bool create_window(void);
 void clear_frame_buffer(uint32_t clear_color);
 void draw_grid(void); 
 void draw_pixel(int x, int y, uint32_t color); 
 void draw_rectangle(int x, int y, int width, int height, uint32_t color);
-void draw_line(vec2_t p0, vec2_t p1, uint32_t color); 
-void draw_triangle(triangle_t triangle); 
+void draw_line(vec2_t p0, vec2_t p1, int thickness, uint32_t color); 
 void update_renderer_texture(void);
 
 #endif
