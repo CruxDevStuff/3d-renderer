@@ -11,6 +11,7 @@ typedef struct {
     vec2_t projected_vertices[3];
     vec2_t projected_normal; 
     uint32_t color; 
+    float z_depth; 
 } triangle_t; 
 
 triangle_t simple_triangle;

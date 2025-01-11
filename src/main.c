@@ -83,8 +83,26 @@ vec2_t get_projection_2d(vec3_t vec3_point) {
     return point_2d;
 }
 
+int z_compare(const void* a, const void* b) {
+    float a_depth = (*(triangle_t*)(a)).z_depth; 
+    float b_depth = (*(triangle_t*)(b)).z_depth; 
+
+    if (a_depth > b_depth) {; 
+        return -1; 
+    }
+
+    if (a_depth < b_depth) {; 
+        return 1; 
+    }
+
+    return 0; 
+}
+
 void render(void) {
     int triangle_count = array_length(triangle_buffer); 
+
+    // sort triangle by depth high to low
+    qsort(triangle_buffer, triangle_count, sizeof(triangle_t), z_compare); 
 
     for (int i = 0; i < triangle_count; i++) {
         triangle_t cur_triangle = triangle_buffer[i];
@@ -111,6 +129,7 @@ void render(void) {
     update_renderer_texture();
     clear_frame_buffer(0xFF000000); 
     SDL_RenderPresent(renderer);
+
 }
 
 void cleanup(void) {
@@ -175,8 +194,10 @@ void update(void) {
         _triangle.projected_vertices[0] = get_projection_2d(vertices[0]); 
         _triangle.projected_vertices[1] = get_projection_2d(vertices[1]); 
         _triangle.projected_vertices[2] = get_projection_2d(vertices[2]); 
+        _triangle.z_depth = (vertices[0].z + vertices[1].z + vertices[2].z) / 3.0;  // set the z depth of the face to be the average of their z components
         _triangle.projected_normal = get_projection_2d(add_vec3(div_vec3(face_normal, 2), vertices[0])); 
         _triangle.color = main_mesh.faces[i].color;
+
         array_push(triangle_buffer, _triangle); 
     }
 }
