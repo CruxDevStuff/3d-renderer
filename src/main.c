@@ -120,6 +120,7 @@ void cleanup(void) {
     SDL_DestroyWindow(window);
     SDL_Quit();
 }
+
 void update(void) {
     int wait_time = frame_time - (SDL_GetTicks() - previous_frame_time); 
     frame_wait_time = wait_time; // just a global copy of local wait time, servers no purpose

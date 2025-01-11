@@ -19,5 +19,7 @@ triangle_t simple_triangle;
 
 void fill_triangle(triangle_t triangle, uint32_t color); 
 void draw_triangle(triangle_t triangle, uint32_t color);
+void fill_flat_bottom_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, uint32_t color);
+void fill_flat_top_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, uint32_t color); 
 
 #endif
