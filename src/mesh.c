@@ -35,6 +35,10 @@ mesh_t* load_obj_file(char *filename) {
     mesh_t* mesh = (mesh_t*)malloc(sizeof(mesh_t)); 
     FILE* f_ptr;  
 
+    if (!strcmp(filename, "cube")) {
+        mesh = load_cube_data(); 
+    } 
+
     f_ptr = fopen(filename, "r"); 
     char read_line[500]; 
 

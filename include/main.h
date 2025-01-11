@@ -11,3 +11,5 @@ void handle_input(void);
 void render(void); 
 void cleanup(void); 
 void update(void); 
+
+uint32_t wireframe_color = 0xFF00FF00;

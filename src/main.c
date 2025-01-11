@@ -41,6 +41,7 @@ void handle_input(void) {
                     break;
                 case SDLK_w:
                     render_settings->DRAW_WIREFRAME = !(render_settings->DRAW_WIREFRAME); 
+                    render_settings->COLOR_FACES = !(render_settings->COLOR_FACES); 
                     break; 
                 case SDLK_v:
                     render_settings->DRAW_VERTICES = !(render_settings->DRAW_VERTICES); 
@@ -53,6 +54,7 @@ void handle_input(void) {
                     break;
                 case SDLK_c:
                     render_settings->COLOR_FACES = !(render_settings->COLOR_FACES); 
+                    render_settings->DRAW_WIREFRAME = !(render_settings->DRAW_WIREFRAME); 
                     break;
                 default:
                     break;
@@ -86,19 +88,18 @@ void render(void) {
 
     for (int i = 0; i < triangle_count; i++) {
         triangle_t cur_triangle = triangle_buffer[i];
+        uint32_t outline_draw_color = cur_triangle.color; 
+
+        // highlight wireframe if enabled        
+        if (render_settings->DRAW_WIREFRAME) {
+            outline_draw_color = wireframe_color; 
+        }
 
         // draw and fill triangle
-        draw_triangle(cur_triangle, cur_triangle.color); 
         if (render_settings->COLOR_FACES) {
             fill_triangle(cur_triangle, cur_triangle.color); 
         }
-
-        // draw wireframe highlight lines
-        if (render_settings->DRAW_WIREFRAME) {
-            draw_line(cur_triangle.projected_vertices[0], cur_triangle.projected_vertices[1], 2, 0xFF000000); 
-            draw_line(cur_triangle.projected_vertices[1], cur_triangle.projected_vertices[2], 2, 0xFF000000); 
-            draw_line(cur_triangle.projected_vertices[2], cur_triangle.projected_vertices[0], 2, 0xFF000000); 
-        }
+        draw_triangle(cur_triangle, outline_draw_color); 
 
         // draw normal lines
         if (render_settings->DRAW_FACE_NORMALS) {
@@ -137,7 +138,7 @@ void update(void) {
     main_mesh.rotation.y += 0.01; 
     main_mesh.rotation.x += 0.01; 
     main_mesh.rotation.z += 0.01; 
-    
+
     for (int i = 0; i < mesh_face_count; i++) {
         vec3_t vertices[3];
         // rotate vertices 
@@ -192,7 +193,6 @@ int main(int argc, char* argv[]) {
     setup(); 
 
     mesh_t *model = load_obj_file(argv[1]); 
-    // mesh_t *model = load_cube_data(); 
 
     if (model != NULL) {
         main_mesh = *model;
@@ -202,7 +202,7 @@ int main(int argc, char* argv[]) {
         handle_input(); 
         update();
         render(); 
-        printf("wait time: %d\n", frame_wait_time);
+        // printf("wait time: %d\n", frame_wait_time);
     }
 
     cleanup(); 
