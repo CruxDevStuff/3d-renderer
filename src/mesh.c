@@ -81,6 +81,10 @@ mesh_t* load_obj_file(char *filename) {
         }
     }
 
+    mesh->scale = default_scale; 
+    mesh->rotation = default_rotation; 
+    mesh->translation = default_translation; 
+    
     fclose(f_ptr); 
     return mesh; 
 }
