@@ -4,6 +4,7 @@
 #include "vector.h"
 #include "array.h"
 #include "string.h"
+#include "matrix.h"
 
 bool running = false; 
 void setup(void); 

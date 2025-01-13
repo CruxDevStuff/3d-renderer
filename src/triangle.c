@@ -99,10 +99,8 @@ void fill_triangle(triangle_t triangle, uint32_t color) {
     }
      
     if (vertex_1.y == vertex_2.y) {
-        printf("UPPER ZERO DIV AVOIDED\n"); 
         fill_flat_bottom_triangle(vertex_0, vertex_1, vertex_2, color); 
     } else if (vertex_0.y == vertex_1.y) {
-        printf("LOWER ZERO DIV AVOIDED\n"); 
         fill_flat_top_triangle(vertex_0, vertex_1, vertex_2, color); 
     } else {
 

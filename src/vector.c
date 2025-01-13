@@ -112,6 +112,16 @@ vec3_t get_normalized_vector(vec3_t vec) {
     return normalized; 
 }
 
+vec4_t get_homogeneous_vec3(vec3_t vec) {
+    vec4_t v = {.x=vec.x, .y=vec.y, .z=vec.z, .w=1}; 
+    return v; 
+}
+
+vec3_t get_vec3_homogeneous(vec4_t vec) {
+    vec3_t v = {.x=vec.x, .y=vec.y, .z=vec.z}; 
+    return v; 
+}
+
 void test_vector_ops(void) {
     // this function is a masterclass on how to write shitty tests
 

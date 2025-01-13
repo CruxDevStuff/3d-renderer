@@ -13,6 +13,13 @@ typedef struct {
     float z; 
 } vec3_t;
 
+typedef struct {
+    float x;
+    float y; 
+    float z; 
+    float w; 
+} vec4_t;
+
 vec3_t get_rotated_point(vec3_t point, vec3_t rotation); 
 vec3_t get_rotated_point_z(vec3_t point, vec3_t rotation); 
 vec3_t get_rotated_point_y(vec3_t point, vec3_t rotation); 
@@ -33,6 +40,9 @@ vec3_t get_crossproduct(vec3_t a, vec3_t b);
 float get_dotproduct(vec3_t a, vec3_t b);
 
 vec3_t get_normalized_vector(vec3_t vec);
+
+vec4_t get_homogeneous_vec3(vec3_t vec);
+vec3_t get_vec3_homogeneous(vec4_t vec); 
 
 void test_vector_ops(void); 
 #endif 
