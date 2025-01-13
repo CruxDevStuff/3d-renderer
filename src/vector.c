@@ -46,10 +46,6 @@ vec3_t get_rotated_point(vec3_t point, vec3_t rotation) {
     v = get_vec3_from_homogeneous(mul_matrix4_vec4(r_y, get_homogeneous_from_vec3(v))); 
     v = get_vec3_from_homogeneous(mul_matrix4_vec4(r_z, get_homogeneous_from_vec3(v))); 
     return v; 
-    // vec3_t rotated_point = get_rotated_point_z(point, rotation); 
-    // rotated_point = get_rotated_point_y(rotated_point, rotation); 
-    // rotated_point = get_rotated_point_x(rotated_point, rotation);
-    // return rotated_point; 
 }
 
 float get_magnitude_vec2(vec2_t vec) {

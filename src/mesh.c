@@ -99,6 +99,10 @@ mesh_t *load_cube_data(void) {
         array_push(mesh->vertices, cube_vertices[i]); 
     }
 
+    mesh->scale = default_scale; 
+    mesh->rotation = default_rotation; 
+    mesh->translation = default_translation; 
+
     return mesh;     
 }
 

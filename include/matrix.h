@@ -14,4 +14,6 @@ vec4_t mul_matrix4_vec4(matrix4_t m, vec4_t v);
 matrix4_t get_rotation_matrix_x(float rotation); 
 matrix4_t get_rotation_matrix_y(float rotation); 
 matrix4_t get_rotation_matrix_z(float rotation); 
+matrix4_t get_rotation_matrix(vec3_t rot); 
+matrix4_t mul_matrix4_matrix4(matrix4_t a, matrix4_t b); 
 #endif

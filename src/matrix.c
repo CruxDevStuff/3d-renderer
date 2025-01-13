@@ -62,3 +62,32 @@ vec4_t mul_matrix4_vec4(matrix4_t m, vec4_t v) {
     }; 
     return ret; 
 }
+
+matrix4_t mul_matrix4_matrix4(matrix4_t a, matrix4_t b) {
+    matrix4_t m; 
+    for (int r = 0; r < 4; r++) {
+        for (int i=0; i < 4; i++) {
+            m.values[r][i] = a.values[r][0]*b.values[0][i] + a.values[r][1]*b.values[1][i] + a.values[r][2]*b.values[2][i]  + a.values[r][3]*b.values[3][i]; 
+        }
+    }
+    return m;  
+}
+
+matrix4_t get_rotation_matrix(vec3_t rot) {
+    float x = rot.x;  float y = rot.y; float z = rot.z; 
+    matrix4_t r = get_identity_matrix_4(); 
+
+    r.values[0][0] = cos(y)*cos(z); 
+    r.values[0][1] = sin(x)*sin(y)*cos(z) - cos(x)*sin(z); 
+    r.values[0][2] = cos(x)*sin(y)*cos(z) + sin(x)*sin(z); 
+
+    r.values[1][0] = cos(y)*sin(z); 
+    r.values[1][1] = sin(x)*sin(y)*sin(z) + cos(x)*cos(z); 
+    r.values[1][2] = cos(x)*sin(y)*sin(z) - sin(x)*cos(z); 
+
+    r.values[2][0] = -sin(y); 
+    r.values[2][1] = sin(x)*cos(y); 
+    r.values[2][2] = cos(x)*cos(y); 
+
+    return r;
+}

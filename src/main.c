@@ -17,9 +17,6 @@ mesh_t main_mesh;
 // main dynamic array that holds all the triangles to draw in the render step
 triangle_t* triangle_buffer = NULL; 
 
-vec3_t scale = {.x=1, .y=1, .z=1}; 
-vec3_t translation = {.x=0, .y=0, .z=5}; 
-
 void setup(void) {
     frame_buffer = (uint32_t*)malloc((sizeof(uint32_t)) * (window_width * window_height)); 
     if (frame_buffer == NULL) {
@@ -163,9 +160,16 @@ void update(void) {
     main_mesh.rotation.x += 0.01; 
     main_mesh.rotation.z += 0.01; 
 
-    matrix4_t s_matrix = get_scale_matrix(scale); 
-    matrix4_t t_matrix = get_translation_matrix(translation); 
-    matrix4_t r_x_matrix = get_rotation_matrix_x(main_mesh.rotation.x); 
+    main_mesh.translation.z = 5; 
+
+    matrix4_t s_matrix = get_scale_matrix(main_mesh.scale); 
+    matrix4_t r_matrix = get_rotation_matrix(main_mesh.rotation); 
+    matrix4_t t_matrix = get_translation_matrix(main_mesh.translation); 
+
+    // TODO : y rotation is flipped, make it counter clock wise
+    // compose all matrix operations into a single matrix, matrix multiply in exact order: Translate x Rotate x Scale 
+    matrix4_t transformation_matrix = mul_matrix4_matrix4(r_matrix, s_matrix); 
+    transformation_matrix = mul_matrix4_matrix4(t_matrix, transformation_matrix); 
 
     for (int i = 0; i < mesh_face_count; i++) {
         vec3_t vertices[3];
@@ -173,21 +177,11 @@ void update(void) {
         vertices[0] =  main_mesh.vertices[main_mesh.faces[i].a - 1];
         vertices[1] =  main_mesh.vertices[main_mesh.faces[i].b - 1];
         vertices[2] =  main_mesh.vertices[main_mesh.faces[i].c - 1]; 
+        
+        vertices[0] = get_vec3_from_homogeneous(mul_matrix4_vec4(transformation_matrix, get_homogeneous_from_vec3(vertices[0]))); 
+        vertices[1] = get_vec3_from_homogeneous(mul_matrix4_vec4(transformation_matrix, get_homogeneous_from_vec3(vertices[1]))); 
+        vertices[2] = get_vec3_from_homogeneous(mul_matrix4_vec4(transformation_matrix, get_homogeneous_from_vec3(vertices[2]))); 
 
-        // scale
-        vertices[0] = get_vec3_from_homogeneous(mul_matrix4_vec4(s_matrix, get_homogeneous_from_vec3(vertices[0]))); 
-        vertices[1] = get_vec3_from_homogeneous(mul_matrix4_vec4(s_matrix, get_homogeneous_from_vec3(vertices[1]))); 
-        vertices[2] = get_vec3_from_homogeneous(mul_matrix4_vec4(s_matrix, get_homogeneous_from_vec3(vertices[2]))); 
-
-        // rotation
-        vertices[0] =  get_rotated_point(main_mesh.vertices[main_mesh.faces[i].a - 1], main_mesh.rotation);
-        vertices[1] =  get_rotated_point(main_mesh.vertices[main_mesh.faces[i].b - 1], main_mesh.rotation);
-        vertices[2] =  get_rotated_point(main_mesh.vertices[main_mesh.faces[i].c - 1], main_mesh.rotation); 
-
-        // // translate
-        vertices[0] = get_vec3_from_homogeneous(mul_matrix4_vec4(t_matrix, get_homogeneous_from_vec3(vertices[0]))); 
-        vertices[1] = get_vec3_from_homogeneous(mul_matrix4_vec4(t_matrix, get_homogeneous_from_vec3(vertices[1]))); 
-        vertices[2] = get_vec3_from_homogeneous(mul_matrix4_vec4(t_matrix, get_homogeneous_from_vec3(vertices[2]))); 
         /*
         BACK FACE CULLING - ONLY RENDER FACES THAT ARE FACING THE CAMERA
         MATH:
