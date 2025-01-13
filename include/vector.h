@@ -20,6 +20,8 @@ typedef struct {
     float w; 
 } vec4_t;
 
+#include "matrix.h"
+
 vec3_t get_rotated_point(vec3_t point, vec3_t rotation); 
 vec3_t get_rotated_point_z(vec3_t point, vec3_t rotation); 
 vec3_t get_rotated_point_y(vec3_t point, vec3_t rotation); 
@@ -41,8 +43,8 @@ float get_dotproduct(vec3_t a, vec3_t b);
 
 vec3_t get_normalized_vector(vec3_t vec);
 
-vec4_t get_homogeneous_vec3(vec3_t vec);
-vec3_t get_vec3_homogeneous(vec4_t vec); 
+vec4_t get_homogeneous_from_vec3(vec3_t vec);
+vec3_t get_vec3_from_homogeneous(vec4_t vec); 
 
 void test_vector_ops(void); 
 #endif 

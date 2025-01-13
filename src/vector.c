@@ -39,10 +39,17 @@ vec3_t get_rotated_point_x(vec3_t point, vec3_t rotation) {
 
 vec3_t get_rotated_point(vec3_t point, vec3_t rotation) {
     // apply rotation in all three axis 
-    vec3_t rotated_point = get_rotated_point_z(point, rotation); 
-    rotated_point = get_rotated_point_y(rotated_point, rotation); 
-    rotated_point = get_rotated_point_x(rotated_point, rotation);
-    return rotated_point; 
+    matrix4_t r_x = get_rotation_matrix_x(rotation.x); 
+    matrix4_t r_y = get_rotation_matrix_y(rotation.y); 
+    matrix4_t r_z = get_rotation_matrix_z(rotation.z); 
+    vec3_t v = get_vec3_from_homogeneous(mul_matrix4_vec4(r_x, get_homogeneous_from_vec3(point))); 
+    v = get_vec3_from_homogeneous(mul_matrix4_vec4(r_y, get_homogeneous_from_vec3(v))); 
+    v = get_vec3_from_homogeneous(mul_matrix4_vec4(r_z, get_homogeneous_from_vec3(v))); 
+    return v; 
+    // vec3_t rotated_point = get_rotated_point_z(point, rotation); 
+    // rotated_point = get_rotated_point_y(rotated_point, rotation); 
+    // rotated_point = get_rotated_point_x(rotated_point, rotation);
+    // return rotated_point; 
 }
 
 float get_magnitude_vec2(vec2_t vec) {
@@ -112,12 +119,12 @@ vec3_t get_normalized_vector(vec3_t vec) {
     return normalized; 
 }
 
-vec4_t get_homogeneous_vec3(vec3_t vec) {
+vec4_t get_homogeneous_from_vec3(vec3_t vec) {
     vec4_t v = {.x=vec.x, .y=vec.y, .z=vec.z, .w=1}; 
     return v; 
 }
 
-vec3_t get_vec3_homogeneous(vec4_t vec) {
+vec3_t get_vec3_from_homogeneous(vec4_t vec) {
     vec3_t v = {.x=vec.x, .y=vec.y, .z=vec.z}; 
     return v; 
 }
