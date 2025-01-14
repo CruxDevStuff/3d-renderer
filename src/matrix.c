@@ -74,19 +74,21 @@ matrix4_t mul_matrix4_matrix4(matrix4_t a, matrix4_t b) {
 }
 
 matrix4_t get_rotation_matrix(vec3_t rot) {
-    float x = rot.x;  float y = rot.y; float z = rot.z; 
+    // lefthand coordinate system, rotation in counterclock wise direction.
+    // TODO: x axis spins in the wrong direction(clockwise), flipping it as a temporary hack. find out why. 
+    float x = -(rot.x);  float y = rot.y; float z = rot.z; 
     matrix4_t r = get_identity_matrix_4(); 
 
     r.values[0][0] = cos(y)*cos(z); 
-    r.values[0][1] = sin(x)*sin(y)*cos(z) - cos(x)*sin(z); 
-    r.values[0][2] = cos(x)*sin(y)*cos(z) + sin(x)*sin(z); 
+    r.values[0][1] = sin(x)*sin(y)*cos(z) + cos(x)*sin(z); 
+    r.values[0][2] = (-cos(x))*sin(y)*cos(z) + sin(x)*sin(z); 
 
-    r.values[1][0] = cos(y)*sin(z); 
-    r.values[1][1] = sin(x)*sin(y)*sin(z) + cos(x)*cos(z); 
-    r.values[1][2] = cos(x)*sin(y)*sin(z) - sin(x)*cos(z); 
+    r.values[1][0] = (-cos(y))*sin(z); 
+    r.values[1][1] = (-sin(x))*sin(y)*sin(z) + cos(x)*cos(z); 
+    r.values[1][2] = cos(x)*sin(y)*sin(z) + sin(x)*cos(z); 
 
-    r.values[2][0] = -sin(y); 
-    r.values[2][1] = sin(x)*cos(y); 
+    r.values[2][0] = sin(y); 
+    r.values[2][1] = (-sin(x))*cos(y); 
     r.values[2][2] = cos(x)*cos(y); 
 
     return r;

@@ -156,9 +156,9 @@ void update(void) {
     // main_mesh.rotation.x += 0.01; 
     // main_mesh.rotation.z = 3.14; 
 
-    main_mesh.rotation.y += 0.01; 
+    // main_mesh.rotation.y += 0.01; 
     main_mesh.rotation.x += 0.01; 
-    main_mesh.rotation.z += 0.01; 
+    // main_mesh.rotation.z += 0.01; 
 
     main_mesh.translation.z = 5; 
 
@@ -166,8 +166,7 @@ void update(void) {
     matrix4_t r_matrix = get_rotation_matrix(main_mesh.rotation); 
     matrix4_t t_matrix = get_translation_matrix(main_mesh.translation); 
 
-    // TODO : y rotation is flipped, make it counter clock wise
-    // compose all matrix operations into a single matrix, matrix multiply in exact order: Translate x Rotate x Scale 
+    // compose scale, rotation, translation into a single transformation matrix, matrix multiply in exact order: Translate x Rotate x Scale 
     matrix4_t transformation_matrix = mul_matrix4_matrix4(r_matrix, s_matrix); 
     transformation_matrix = mul_matrix4_matrix4(t_matrix, transformation_matrix); 
 
