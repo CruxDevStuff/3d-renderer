@@ -112,10 +112,11 @@ vec2_t get_perspective_projected_point(vec3_t point, matrix4_t proj_m) {
     v = mul_matrix4_vec4(proj_m, v); 
 
     // perspective divide 
-    v.x /= v.w; 
-    v.y /= v.w; 
-    v.z /= v.w; 
-
+    if (v.w != 0) {
+        v.x /= v.w; 
+        v.y /= v.w; 
+        v.z /= v.w; 
+    }
     vec2_t r = {.x=v.x, .y=v.y}; 
 
     // go from NDC(-1, 1) to screen space
