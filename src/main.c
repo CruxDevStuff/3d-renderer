@@ -2,7 +2,7 @@
 
 const int cube_side = 9; 
 const int POINT_N = cube_side * cube_side * cube_side;
-const int FOV_SCALE_FACTOR = 900; 
+const int FOV_SCALE_FACTOR = 600; 
 const int FPS = 30;
 const int frame_time = (1000 / FPS); 
 
@@ -16,6 +16,7 @@ uint32_t previous_frame_time = 0;
 mesh_t main_mesh; 
 // main dynamic array that holds all the triangles to draw in the render step
 triangle_t* triangle_buffer = NULL; 
+matrix4_t proj_m; 
 
 void setup(void) {
     frame_buffer = (uint32_t*)malloc((sizeof(uint32_t)) * (window_width * window_height)); 
@@ -24,6 +25,7 @@ void setup(void) {
     }
 
     frame_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, window_width, window_height); 
+    proj_m = get_perspective_proj_matrix(M_PI/3, aspect_ratio, 0.05, 100); 
 }
 
 void handle_input(void) {
@@ -152,23 +154,13 @@ void update(void) {
     triangle_t _triangle; 
     int mesh_face_count = array_length(main_mesh.faces); 
 
-    // main_mesh.rotation.y = 3.14/2; 
+    main_mesh.rotation.y += 0.01; 
     // main_mesh.rotation.x += 0.01; 
-    // main_mesh.rotation.z = 3.14; 
-
-    // main_mesh.rotation.y += 0.01; 
-    main_mesh.rotation.x += 0.01; 
     // main_mesh.rotation.z += 0.01; 
 
     main_mesh.translation.z = 5; 
 
-    matrix4_t s_matrix = get_scale_matrix(main_mesh.scale); 
-    matrix4_t r_matrix = get_rotation_matrix(main_mesh.rotation); 
-    matrix4_t t_matrix = get_translation_matrix(main_mesh.translation); 
-
-    // compose scale, rotation, translation into a single transformation matrix, matrix multiply in exact order: Translate x Rotate x Scale 
-    matrix4_t transformation_matrix = mul_matrix4_matrix4(r_matrix, s_matrix); 
-    transformation_matrix = mul_matrix4_matrix4(t_matrix, transformation_matrix); 
+    matrix4_t transformation_matrix = get_transformation_matrix(main_mesh.scale, main_mesh.rotation, main_mesh.translation); 
 
     for (int i = 0; i < mesh_face_count; i++) {
         vec3_t vertices[3];
@@ -201,13 +193,13 @@ void update(void) {
             continue;
         }
 
-        _triangle.projected_vertices[0] = get_projection_2d(vertices[0]); 
-        _triangle.projected_vertices[1] = get_projection_2d(vertices[1]); 
-        _triangle.projected_vertices[2] = get_projection_2d(vertices[2]); 
-        _triangle.z_depth = (vertices[0].z + vertices[1].z + vertices[2].z) / 3.0;  // set the z depth of the face to be the average of their z components
-        _triangle.projected_normal = get_projection_2d(add_vec3(div_vec3(face_normal, 2), vertices[0])); 
-        _triangle.color = main_mesh.faces[i].color;
+        _triangle.projected_vertices[0] = get_perspective_projected_point(vertices[0], proj_m); 
+        _triangle.projected_vertices[1] = get_perspective_projected_point(vertices[1], proj_m); 
+        _triangle.projected_vertices[2] = get_perspective_projected_point(vertices[2], proj_m); 
+        _triangle.projected_normal = get_perspective_projected_point(add_vec3(div_vec3(face_normal, 2), vertices[0]), proj_m); 
 
+        _triangle.z_depth = (vertices[0].z + vertices[1].z + vertices[2].z) / 3.0;  // set the z depth of the face to be the average of their z components
+        _triangle.color = main_mesh.faces[i].color;
         array_push(triangle_buffer, _triangle); 
     }
 }

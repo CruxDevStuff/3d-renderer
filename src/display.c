@@ -21,9 +21,11 @@ bool create_window(void) {
     // window     
     SDL_DisplayMode display_node; 
     SDL_GetCurrentDisplayMode(0, &display_node); 
+
     window_width = display_node.w; 
     window_height = display_node.h; 
-    
+    aspect_ratio = (float)window_height / (float)window_width;  
+
     window = SDL_CreateWindow("renderer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, SDL_WINDOW_BORDERLESS);
     if (!window) {
         fprintf(stderr, "Failed to create window: %s\n", SDL_GetError());

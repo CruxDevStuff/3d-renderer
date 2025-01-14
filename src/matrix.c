@@ -93,3 +93,52 @@ matrix4_t get_rotation_matrix(vec3_t rot) {
 
     return r;
 }
+
+matrix4_t get_perspective_proj_matrix(float fov, float aspect_ratio, float z_near, float z_far) {
+    float f = (1/tan(fov/2));
+    matrix4_t proj = {0}; 
+
+    proj.values[0][0] = aspect_ratio * f; 
+    proj.values[1][1] = f; 
+    proj.values[2][2] = z_far / (z_far - z_near); 
+    proj.values[2][3] = (-(z_far * z_near)) / (z_far - z_near); 
+    proj.values[3][2] = 1; 
+
+    return proj;
+}
+
+vec2_t get_perspective_projected_point(vec3_t point, matrix4_t proj_m) {
+    vec4_t v = get_homogeneous_from_vec3(point); 
+    v = mul_matrix4_vec4(proj_m, v); 
+
+    // perspective divide 
+    v.x /= v.w; 
+    v.y /= v.w; 
+    v.z /= v.w; 
+
+    vec2_t r = {.x=v.x, .y=v.y}; 
+
+    // go from NDC(-1, 1) to screen space
+    r.x *= window_width / 2.0; 
+    r.y *= window_height / 2.0; 
+
+    /* 
+    screen origin (0, 0) is at top left while our 3D cartesian space origin (0,0,0) is middle of the screen, 
+    translate all points to account for this offset between world and screen space
+    */
+    r.x += window_width / 2.0; 
+    r.y += window_height / 2.0; 
+
+    return r; 
+}
+
+matrix4_t get_transformation_matrix(vec3_t scale, vec3_t rotation, vec3_t translation) {
+    matrix4_t s_matrix = get_scale_matrix(scale); 
+    matrix4_t r_matrix = get_rotation_matrix(rotation); 
+    matrix4_t t_matrix = get_translation_matrix(translation); 
+
+    // compose scale, rotation, translation into a single transformation matrix, matrix multiply in exact order: Translate x Rotate x Scale 
+    matrix4_t transformation_matrix = mul_matrix4_matrix4(r_matrix, s_matrix); 
+    transformation_matrix = mul_matrix4_matrix4(t_matrix, transformation_matrix); 
+    return transformation_matrix; 
+}

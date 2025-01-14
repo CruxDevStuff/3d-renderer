@@ -22,6 +22,7 @@ extern render_settings_t *render_settings;
 
 int window_height;
 int window_width; 
+float aspect_ratio; 
 
 bool create_window(void);
 void clear_frame_buffer(uint32_t clear_color);
