@@ -26,7 +26,7 @@ void draw_triangle(triangle_t triangle, uint32_t color) {
     draw_line(triangle.projected_vertices[2], triangle.projected_vertices[0], 2, color); 
 }
 
-void fill_flat_bottom_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, uint32_t color) {
+void fill_flat_bottom_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, uv_t uv_0, uv_t uv_1, uv_t uv_2, uint32_t color, fill_t FILL_TYPE) {
     /*
     FILL UPPER TRIANGLE
     1. fill from top to bottom
@@ -63,7 +63,7 @@ void fill_flat_bottom_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2
 
 }
 
-void fill_flat_top_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, uint32_t color) {
+void fill_flat_top_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, uv_t uv_0, uv_t uv_1, uv_t uv_2, uint32_t color, fill_t FILL_TYPE) {
     /*
     FILL LOWER TRIANGLE
     1. fill from bottom to top
@@ -96,37 +96,49 @@ void fill_flat_top_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, u
     }
 }
 
-void fill_triangle(triangle_t triangle, uint32_t color) {
+void fill_triangle(triangle_t triangle, uint32_t color, fill_t FILL_TYPE) {
     // sort vertices by y coordinate
-    vec2_t vertex_0 = triangle.projected_vertices[0]; 
-    vec2_t vertex_1 = triangle.projected_vertices[1]; 
-    vec2_t vertex_2 = triangle.projected_vertices[2]; 
-    vec2_t temp; 
+    vec2_t vertex_0 = triangle.projected_vertices[0]; uv_t uv_0=triangle.uv[0]; 
+    vec2_t vertex_1 = triangle.projected_vertices[1]; uv_t uv_1=triangle.uv[1]; 
+    vec2_t vertex_2 = triangle.projected_vertices[2]; uv_t uv_2=triangle.uv[2]; 
+    vec2_t temp_v; uv_t temp_uv; 
 
     // sort vertices by y (hight to low)
     if (vertex_0.y > vertex_1.y) {
-        temp = vertex_0; 
+        temp_v = vertex_0; 
         vertex_0 = vertex_1; 
-        vertex_1 = temp; 
+        vertex_1 = temp_v; 
+
+        temp_uv = uv_0; 
+        uv_0 = uv_1; 
+        uv_1 = temp_uv; 
     }
 
     if (vertex_1.y > vertex_2.y) {
-        temp = vertex_1; 
+        temp_v = vertex_1; 
         vertex_1 = vertex_2; 
-        vertex_2 = temp; 
+        vertex_2 = temp_v; 
+        
+        temp_uv = uv_1; 
+        uv_1 = uv_2; 
+        uv_2 = temp_uv; 
     }
 
     if (vertex_0.y > vertex_1.y) {
-        temp = vertex_0; 
+        temp_v = vertex_0; 
         vertex_0 = vertex_1; 
-        vertex_1 = temp; 
+        vertex_1 = temp_v; 
+
+        temp_uv = uv_0; 
+        uv_0 = uv_1; 
+        uv_1 = temp_uv; 
     }
      
     if (vertex_1.y == vertex_2.y) {
-        fill_flat_bottom_triangle(vertex_0, vertex_1, vertex_2, color); 
+        fill_flat_bottom_triangle(vertex_0, vertex_1, vertex_2, uv_0, uv_1, uv_2, color, FILL_TYPE); 
         return; 
     } else if (vertex_0.y == vertex_1.y) {
-        fill_flat_top_triangle(vertex_0, vertex_1, vertex_2, color); 
+        fill_flat_top_triangle(vertex_0, vertex_1, vertex_2, uv_0, uv_1, uv_2, color, FILL_TYPE); 
         return; 
     } 
 
@@ -147,6 +159,6 @@ void fill_triangle(triangle_t triangle, uint32_t color) {
         3. mid_point            3. vertex_2
     */ 
 
-        fill_flat_bottom_triangle(vertex_0, vertex_1, mid_point, color); 
-        fill_flat_top_triangle(vertex_1, mid_point, vertex_2, color); 
+    fill_flat_bottom_triangle(vertex_0, vertex_1, mid_point, uv_0, uv_1, uv_2, color, FILL_TYPE); 
+    fill_flat_top_triangle(vertex_1, mid_point, vertex_2, uv_0, uv_1, uv_2, color, FILL_TYPE); 
 }

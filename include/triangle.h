@@ -24,15 +24,15 @@ typedef struct {
 triangle_t simple_triangle;
 
 typedef enum {
-    SOLID_COLOR,
+    SOLID,
     TEXTURED
 } fill_t; 
 
 #include "display.h"
 
-void fill_triangle(triangle_t triangle, uint32_t color); 
+void fill_triangle(triangle_t triangle, uint32_t color, fill_t FILL_TYPE); 
 void draw_triangle(triangle_t triangle, uint32_t color);
-void fill_flat_bottom_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, uint32_t color);
-void fill_flat_top_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, uint32_t color); 
+void fill_flat_bottom_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, uv_t uv_0, uv_t uv_1, uv_t uv_2, uint32_t color, fill_t FILL_TYPE);
+void fill_flat_top_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, uv_t uv_0, uv_t uv_1, uv_t uv_2, uint32_t color, fill_t FILL_TYPE);
 void draw_textured_triangle(triangle_t triangle, uint32_t* texture); 
 #endif

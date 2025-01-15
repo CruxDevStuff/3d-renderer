@@ -126,7 +126,7 @@ void render(void) {
 
         // draw and fill triangle
         if (render_settings->COLOR_FACES) {
-            fill_triangle(cur_triangle, raster_color); 
+            fill_triangle(cur_triangle, raster_color, SOLID); 
         }
         draw_triangle(cur_triangle, outline_draw_color); 
 
