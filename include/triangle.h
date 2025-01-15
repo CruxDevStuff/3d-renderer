@@ -12,6 +12,7 @@ typedef struct {
     vec2_t projected_normal; 
     uint32_t color; 
     float z_depth; 
+    float light_intensity; 
 } triangle_t; 
 
 triangle_t simple_triangle;

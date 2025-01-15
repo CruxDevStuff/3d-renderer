@@ -119,3 +119,11 @@ void update_renderer_texture(void) {
     SDL_RenderCopy(renderer, frame_buffer_texture, NULL, NULL); 
 }
 
+uint32_t get_light_intensity_adjusted_color(uint32_t color, float intensity) {
+    uint32_t a = 0xFF000000;
+    uint32_t r = (0x00FF0000 & color) * intensity;
+    uint32_t g = (0x0000FF00 & color) * intensity;
+    uint32_t b = (0x000000FF & color) * intensity;
+    uint32_t adjusted_color = a | (r & 0x00FF0000) | (g & 0x0000FF00) | (b & 0x000000FF); 
+    return adjusted_color; 
+}

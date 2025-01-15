@@ -143,3 +143,4 @@ matrix4_t get_transformation_matrix(vec3_t scale, vec3_t rotation, vec3_t transl
     transformation_matrix = mul_matrix4_matrix4(t_matrix, transformation_matrix); 
     return transformation_matrix; 
 }
+

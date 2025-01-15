@@ -18,6 +18,8 @@ mesh_t main_mesh;
 triangle_t* triangle_buffer = NULL; 
 matrix4_t proj_m; 
 
+vec3_t light_ray;
+
 void setup(void) {
     frame_buffer = (uint32_t*)malloc((sizeof(uint32_t)) * (window_width * window_height)); 
     if (frame_buffer == NULL) {
@@ -26,6 +28,21 @@ void setup(void) {
 
     frame_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, window_width, window_height); 
     proj_m = get_perspective_proj_matrix(M_PI/3, aspect_ratio, 0.05, 100); 
+
+    // left to right 
+    // light_ray.x=1.0/2.0; 
+    // light_ray.y=(-1.0/sqrt(2)); 
+    // light_ray.z=1.0/2.0; 
+
+    // right side forward
+    // light_ray.x=1.0/sqrt(2.0); 
+    // light_ray.y=0; 
+    // light_ray.z=1.0/sqrt(2.0); 
+
+    // middle to forward 
+    light_ray.x = 0; 
+    light_ray.y = 0; 
+    light_ray.z = 1; 
 }
 
 void handle_input(void) {
@@ -108,16 +125,17 @@ void render(void) {
 
     for (int i = 0; i < triangle_count; i++) {
         triangle_t cur_triangle = triangle_buffer[i];
-        uint32_t outline_draw_color = cur_triangle.color; 
+        uint32_t outline_draw_color = get_light_intensity_adjusted_color(cur_triangle.color, cur_triangle.light_intensity);
+        uint32_t raster_color = get_light_intensity_adjusted_color(cur_triangle.color, cur_triangle.light_intensity); 
 
         // highlight wireframe if enabled        
         if (render_settings->DRAW_WIREFRAME) {
-            outline_draw_color = wireframe_color; 
+            outline_draw_color = get_light_intensity_adjusted_color(wireframe_color, cur_triangle.light_intensity);
         }
 
         // draw and fill triangle
         if (render_settings->COLOR_FACES) {
-            fill_triangle(cur_triangle, cur_triangle.color); 
+            fill_triangle(cur_triangle, raster_color); 
         }
         draw_triangle(cur_triangle, outline_draw_color); 
 
@@ -155,8 +173,8 @@ void update(void) {
     int mesh_face_count = array_length(main_mesh.faces); 
 
     main_mesh.rotation.y += 0.01; 
-    // main_mesh.rotation.x += 0.01; 
-    // main_mesh.rotation.z += 0.01; 
+    main_mesh.rotation.x += 0.01; 
+    main_mesh.rotation.z += 0.01; 
 
     main_mesh.translation.z = 5; 
 
@@ -187,9 +205,10 @@ void update(void) {
         vec3_t cam_to_face_ray = get_normalized_vector(sub_vec3(vertices[0], camera_position)); 
         vec3_t face_normal = get_normalized_vector(get_crossproduct(ac, ab)); 
 
-        float scalar_projection = get_dotproduct(cam_to_face_ray, face_normal); 
+        float cam_face_align = get_dotproduct(cam_to_face_ray, face_normal); 
+        float face_light_intensity = get_dotproduct(light_ray, face_normal); 
 
-        if (scalar_projection < 0 && render_settings->ENABLE_BACKFACE_CULLING) {
+        if (cam_face_align < 0 && render_settings->ENABLE_BACKFACE_CULLING) {
             continue;
         }
 
@@ -197,6 +216,7 @@ void update(void) {
         _triangle.projected_vertices[1] = get_perspective_projected_point(vertices[1], proj_m); 
         _triangle.projected_vertices[2] = get_perspective_projected_point(vertices[2], proj_m); 
         _triangle.projected_normal = get_perspective_projected_point(add_vec3(div_vec3(face_normal, 2), vertices[0]), proj_m); 
+        _triangle.light_intensity = face_light_intensity; 
 
         _triangle.z_depth = (vertices[0].z + vertices[1].z + vertices[2].z) / 3.0;  // set the z depth of the face to be the average of their z components
         _triangle.color = main_mesh.faces[i].color;
