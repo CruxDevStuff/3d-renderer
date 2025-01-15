@@ -18,7 +18,12 @@ mesh_t main_mesh;
 triangle_t* triangle_buffer = NULL; 
 matrix4_t proj_m; 
 
-vec3_t light_ray;
+// light from middle of the screen
+global_light_t global_light = {
+    .dir.x = 0, 
+    .dir.y = 0, 
+    .dir.z = 1, 
+}; 
 
 void setup(void) {
     frame_buffer = (uint32_t*)malloc((sizeof(uint32_t)) * (window_width * window_height)); 
@@ -28,21 +33,6 @@ void setup(void) {
 
     frame_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, window_width, window_height); 
     proj_m = get_perspective_proj_matrix(M_PI/3, aspect_ratio, 0.05, 100); 
-
-    // left to right 
-    // light_ray.x=1.0/2.0; 
-    // light_ray.y=(-1.0/sqrt(2)); 
-    // light_ray.z=1.0/2.0; 
-
-    // right side forward
-    // light_ray.x=1.0/sqrt(2.0); 
-    // light_ray.y=0; 
-    // light_ray.z=1.0/sqrt(2.0); 
-
-    // middle to forward 
-    light_ray.x = 0; 
-    light_ray.y = 0; 
-    light_ray.z = 1; 
 }
 
 void handle_input(void) {
@@ -202,11 +192,11 @@ void update(void) {
         vec3_t ab = sub_vec3(vertices[1], vertices[0]); 
         vec3_t ac = sub_vec3(vertices[2], vertices[0]); 
 
-        vec3_t cam_to_face_ray = get_normalized_vector(sub_vec3(vertices[0], camera_position)); 
-        vec3_t face_normal = get_normalized_vector(get_crossproduct(ac, ab)); 
+        vec3_t face_to_cam_ray = get_normalized_vector(sub_vec3(camera_position, vertices[0])); 
+        vec3_t face_normal = get_normalized_vector(get_crossproduct(ab, ac)); 
 
-        float cam_face_align = get_dotproduct(cam_to_face_ray, face_normal); 
-        float face_light_intensity = get_dotproduct(light_ray, face_normal); 
+        float cam_face_align = get_dotproduct(face_to_cam_ray, face_normal); 
+        float face_light_intensity = get_face_light_intensity(global_light, face_normal); // face normal points towards screen, so flip the dot product.
 
         if (cam_face_align < 0 && render_settings->ENABLE_BACKFACE_CULLING) {
             continue;

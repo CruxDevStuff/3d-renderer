@@ -5,6 +5,7 @@
 #include "array.h"
 #include "string.h"
 #include "matrix.h"
+#include "light.h"
 
 bool running = false; 
 void setup(void); 
