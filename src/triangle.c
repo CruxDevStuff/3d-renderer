@@ -9,6 +9,7 @@ triangle_t simple_triangle = {
 
    .projected_vertices[2].x = 500,
    .projected_vertices[2].y = 700,
+   .light_intensity = 1,
    .color=0xFFFFFFFF
 };
 
@@ -26,7 +27,7 @@ void draw_triangle(triangle_t triangle, uint32_t color) {
     draw_line(triangle.projected_vertices[2], triangle.projected_vertices[0], 2, color); 
 }
 
-void fill_flat_bottom_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, uv_t uv_0, uv_t uv_1, uv_t uv_2, uint32_t color, fill_t FILL_TYPE) {
+void fill_flat_bottom_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, vec2_t*parent_vertices, uv_t uv_0, uv_t uv_1, uv_t uv_2, uint32_t color, fill_t FILL_TYPE) {
     /*
     FILL UPPER TRIANGLE
     1. fill from top to bottom
@@ -34,8 +35,6 @@ void fill_flat_bottom_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2
     */
     vec2_t start = {.x=vertex_0.x, .y=vertex_0.y}; 
     vec2_t end = {.x=vertex_0.x, .y=vertex_0.y}; 
-    vec2_t swap_p; 
-    float swap_s; 
 
     float u_dx_1 = vertex_0.x - vertex_1.x; 
     float u_dx_2 = vertex_2.x - vertex_0.x;
@@ -43,6 +42,7 @@ void fill_flat_bottom_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2
     float u_m1 = u_dx_1 / u_dy; 
     float u_m2 = u_dx_2 / u_dy; 
 
+    // barycentric_weights_t w; 
     for (int i = 0; i < (int)(u_dy); i++) {
         start.x -= u_m1; start.y += 1; 
         end.x += u_m2; end.y += 1;
@@ -50,11 +50,15 @@ void fill_flat_bottom_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2
         // interpolate in x(left to right or right to left) and color pixel; 
         if (start.x < end.x) {
             for (int x=start.x; x < end.x; x++) {
-                draw_pixel(x, end.y, color); 
+                vec2_t current_point = {.x=x, .y=start.y};
+                paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2); 
+                // draw_pixel(x, end.y, color); 
             }
         } else if (end.x < start.x) {
             for (int x=end.x; x < start.x; x++) {
-                draw_pixel(x, end.y, color); 
+                vec2_t current_point = {.x=x, .y=start.y};
+                paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2); 
+                // draw_pixel(x, end.y, color); 
             }
         }
 
@@ -63,7 +67,7 @@ void fill_flat_bottom_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2
 
 }
 
-void fill_flat_top_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, uv_t uv_0, uv_t uv_1, uv_t uv_2, uint32_t color, fill_t FILL_TYPE) {
+void fill_flat_top_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, vec2_t*parent_vertices, uv_t uv_0, uv_t uv_1, uv_t uv_2, uint32_t color, fill_t FILL_TYPE) {
     /*
     FILL LOWER TRIANGLE
     1. fill from bottom to top
@@ -81,15 +85,19 @@ void fill_flat_top_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, u
     for (int i = 0; i < (int)(l_dy); i++) {
         start.x -= l_m1; start.y -= 1; 
         end.x += l_m2; end.y -= 1;
-
+        
         // interpolate in x(left to right or right to left) and color pixel; 
         if (start.x < end.x) {
             for (int x=start.x; x < end.x; x++) {
-                draw_pixel(x, end.y, color); 
+                vec2_t current_point = {.x=x, .y=start.y};
+                paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2); 
+                // draw_pixel(x, start.y, color); 
             }
         } else if (end.x < start.x) {
             for (int x=end.x; x < start.x; x++) {
-                draw_pixel(x, end.y, color); 
+                vec2_t current_point = {.x=x, .y=start.y};
+                paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2); 
+                // draw_pixel(x, end.y, color); 
             }
         }
         // draw_line(start, end, 2, color); 
@@ -134,11 +142,18 @@ void fill_triangle(triangle_t triangle, uint32_t color, fill_t FILL_TYPE) {
         uv_1 = temp_uv; 
     }
      
+    vec2_t parent_vertices[3];
+    parent_vertices[0] = vertex_0; 
+    parent_vertices[1] = vertex_1; 
+    parent_vertices[2] = vertex_2; 
+    // barycentric_weights_t w = get_barrycentric_weights(vertex_0, vertex_0, vertex_1, vertex_2); 
+    // printf("BARRY A: %f B: %f C: %f\n", w.a, w.b, w.c); 
+
     if (vertex_1.y == vertex_2.y) {
-        fill_flat_bottom_triangle(vertex_0, vertex_1, vertex_2, uv_0, uv_1, uv_2, color, FILL_TYPE); 
+        fill_flat_bottom_triangle(vertex_0, vertex_1, vertex_2, parent_vertices, uv_0, uv_1, uv_2, color, FILL_TYPE); 
         return; 
     } else if (vertex_0.y == vertex_1.y) {
-        fill_flat_top_triangle(vertex_0, vertex_1, vertex_2, uv_0, uv_1, uv_2, color, FILL_TYPE); 
+        fill_flat_top_triangle(vertex_0, vertex_1, vertex_2, parent_vertices, uv_0, uv_1, uv_2, color, FILL_TYPE); 
         return; 
     } 
 
@@ -159,6 +174,48 @@ void fill_triangle(triangle_t triangle, uint32_t color, fill_t FILL_TYPE) {
         3. mid_point            3. vertex_2
     */ 
 
-    fill_flat_bottom_triangle(vertex_0, vertex_1, mid_point, uv_0, uv_1, uv_2, color, FILL_TYPE); 
-    fill_flat_top_triangle(vertex_1, mid_point, vertex_2, uv_0, uv_1, uv_2, color, FILL_TYPE); 
+    fill_flat_bottom_triangle(vertex_0, vertex_1, mid_point, parent_vertices, uv_0, uv_1, uv_2, color, FILL_TYPE); 
+    fill_flat_top_triangle(vertex_1, mid_point, vertex_2, parent_vertices, uv_0, uv_1, uv_2, color, FILL_TYPE); 
+}
+
+barycentric_weights_t get_barrycentric_weights(vec2_t p, vec2_t a, vec2_t b, vec2_t c) {
+    // compute vectors(2D) of sides. for crossproduct purposes represent vec2 in vec3 with z set to 0.
+    vec2_t ac = sub_vec2(c, a); 
+    vec2_t ab = sub_vec2(b, a);  
+
+    vec2_t pc = sub_vec2(c, p);  
+    vec2_t pb = sub_vec2(b, p); 
+    vec2_t ap = sub_vec2(p, a); 
+    
+    float _a = (pc.x * pb.y - pc.y * pb.x) / (ac.x * ab.y - ac.y * ab.x); 
+    float _b = (ac.x * ap.y - ac.y * ap.x) / (ac.x * ab.y - ac.y * ab.x); 
+    float _c = 1 - _a - _b; 
+
+    barycentric_weights_t w = {
+        .a = _a,
+        .b = _b,
+        .c = _c 
+    }; 
+
+    return w; 
+}
+
+
+void paint_texture(vec2_t current_point, uint32_t*texture, vec2_t*parent_vertices, uv_t uv_0, uv_t uv_1, uv_t uv_2) {
+    // get barycentric weights
+    barycentric_weights_t w = get_barrycentric_weights(current_point, parent_vertices[0], parent_vertices[1], parent_vertices[2]); 
+    // scale each uv vector with correspoding weights
+    // printf("BARRY A: %f B: %f C: %f\n", w.a, w.b, w.c); 
+    // printf("SUM : %f\n", (w.a+w.b+w.c)); 
+
+    uv_t scaled_uv = {
+        .u = (uv_0.u * w.a + uv_1.u * w.b + uv_2.u * w.c) * texture_width, 
+        .v = (uv_0.v * w.a + uv_1.v * w.b + uv_2.v * w.c) * texture_height
+    }; 
+    // scale u with texture width and v with texture height to get the coordinates in texture frame
+    
+    // use texture frame to fetch correspoding color
+    int index = (int)(scaled_uv.v * texture_width) + (int)scaled_uv.u; 
+    uint32_t color = texture[index]; 
+    draw_pixel(current_point.x, current_point.y, color); 
 }

@@ -128,7 +128,7 @@ void render(void) {
         if (render_settings->COLOR_FACES) {
             fill_triangle(cur_triangle, raster_color, SOLID); 
         }
-        draw_triangle(cur_triangle, outline_draw_color); 
+        // draw_triangle(cur_triangle, outline_draw_color); 
 
         // draw normal lines
         if (render_settings->DRAW_FACE_NORMALS) {
