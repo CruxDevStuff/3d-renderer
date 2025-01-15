@@ -16,6 +16,8 @@ float get_face_light_intensity(global_light_t light, vec3_t face_normal) {
 }
 
 uint32_t get_light_intensity_adjusted_color(uint32_t color, float intensity) {
+    intensity < 0 ? 0.0 : intensity; 
+
     uint32_t a = 0xFF000000;
     uint32_t r = (0x00FF0000 & color) * intensity;
     uint32_t g = (0x0000FF00 & color) * intensity;

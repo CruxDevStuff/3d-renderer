@@ -12,7 +12,6 @@ triangle_t simple_triangle = {
    .color=0xFFFFFFFF
 };
 
-
 void draw_triangle(triangle_t triangle, uint32_t color) {
     // draw vertices 
     if (render_settings->DRAW_VERTICES) {
@@ -35,6 +34,8 @@ void fill_flat_bottom_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2
     */
     vec2_t start = {.x=vertex_0.x, .y=vertex_0.y}; 
     vec2_t end = {.x=vertex_0.x, .y=vertex_0.y}; 
+    vec2_t swap_p; 
+    float swap_s; 
 
     float u_dx_1 = vertex_0.x - vertex_1.x; 
     float u_dx_2 = vertex_2.x - vertex_0.x;
@@ -45,7 +46,19 @@ void fill_flat_bottom_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2
     for (int i = 0; i < (int)(u_dy); i++) {
         start.x -= u_m1; start.y += 1; 
         end.x += u_m2; end.y += 1;
-        draw_line(start, end, 2, color); 
+
+        // interpolate in x(left to right or right to left) and color pixel; 
+        if (start.x < end.x) {
+            for (int x=start.x; x < end.x; x++) {
+                draw_pixel(x, end.y, color); 
+            }
+        } else if (end.x < start.x) {
+            for (int x=end.x; x < start.x; x++) {
+                draw_pixel(x, end.y, color); 
+            }
+        }
+
+        // draw_line(start, end, 2, color); 
     }
 
 }
@@ -68,7 +81,18 @@ void fill_flat_top_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, u
     for (int i = 0; i < (int)(l_dy); i++) {
         start.x -= l_m1; start.y -= 1; 
         end.x += l_m2; end.y -= 1;
-        draw_line(start, end, 2, color); 
+
+        // interpolate in x(left to right or right to left) and color pixel; 
+        if (start.x < end.x) {
+            for (int x=start.x; x < end.x; x++) {
+                draw_pixel(x, end.y, color); 
+            }
+        } else if (end.x < start.x) {
+            for (int x=end.x; x < start.x; x++) {
+                draw_pixel(x, end.y, color); 
+            }
+        }
+        // draw_line(start, end, 2, color); 
     }
 }
 
@@ -100,10 +124,11 @@ void fill_triangle(triangle_t triangle, uint32_t color) {
      
     if (vertex_1.y == vertex_2.y) {
         fill_flat_bottom_triangle(vertex_0, vertex_1, vertex_2, color); 
+        return; 
     } else if (vertex_0.y == vertex_1.y) {
         fill_flat_top_triangle(vertex_0, vertex_1, vertex_2, color); 
-    } else {
-
+        return; 
+    } 
 
     /*
     MATH
@@ -124,5 +149,4 @@ void fill_triangle(triangle_t triangle, uint32_t color) {
 
         fill_flat_bottom_triangle(vertex_0, vertex_1, mid_point, color); 
         fill_flat_top_triangle(vertex_1, mid_point, vertex_2, color); 
-    }
 }

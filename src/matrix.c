@@ -75,8 +75,8 @@ matrix4_t mul_matrix4_matrix4(matrix4_t a, matrix4_t b) {
 
 matrix4_t get_rotation_matrix(vec3_t rot) {
     // lefthand coordinate system, rotation in counterclock wise direction.
-    // TODO: x axis spins in the wrong direction(clockwise), flipping it as a temporary hack. find out why. 
-    float x = -(rot.x);  float y = rot.y; float z = rot.z; 
+    // TODO: y axis spins in the wrong direction(clockwise), flipping it as a temporary hack. find out why. 
+    float x = rot.x;  float y = rot.y; float z = -(rot.z); 
     matrix4_t r = get_identity_matrix_4(); 
 
     r.values[0][0] = cos(y)*cos(z); 
@@ -119,10 +119,11 @@ vec2_t get_perspective_projected_point(vec3_t point, matrix4_t proj_m) {
     }
     vec2_t r = {.x=v.x, .y=v.y}; 
 
-    // go from NDC(-1, 1) to screen space
+    // NDC(-1, 1) to screen space
     r.x *= window_width / 2.0; 
     r.y *= window_height / 2.0; 
-
+    // account for inverted screen space. mesh y values +y is bottom but +y in screen space is down;
+    r.y *= -1; 
     /* 
     screen origin (0, 0) is at top left while our 3D cartesian space origin (0,0,0) is middle of the screen, 
     translate all points to account for this offset between world and screen space

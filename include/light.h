@@ -1,5 +1,5 @@
 #ifndef LIGHT_H
-#define LIGH_H
+#define LIGHT_H
 #include "stdlib.h"
 #include "vector.h"
 

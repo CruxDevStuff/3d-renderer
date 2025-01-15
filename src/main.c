@@ -33,6 +33,7 @@ void setup(void) {
 
     frame_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, window_width, window_height); 
     proj_m = get_perspective_proj_matrix(M_PI/3, aspect_ratio, 0.05, 100); 
+    main_mesh_texture = (uint32_t*)REDBRICK_TEXTURE; 
 }
 
 void handle_input(void) {
@@ -120,7 +121,7 @@ void render(void) {
 
         // highlight wireframe if enabled        
         if (render_settings->DRAW_WIREFRAME) {
-            outline_draw_color = get_light_intensity_adjusted_color(wireframe_color, cur_triangle.light_intensity);
+            outline_draw_color = wireframe_color; 
         }
 
         // draw and fill triangle
@@ -162,14 +163,18 @@ void update(void) {
     triangle_t _triangle; 
     int mesh_face_count = array_length(main_mesh.faces); 
 
-    main_mesh.rotation.y += 0.01; 
-    main_mesh.rotation.x += 0.01; 
-    main_mesh.rotation.z += 0.01; 
+    // main_mesh.rotation.y += 0.01; 
+    // main_mesh.rotation.x = M_PI/1; 
+    main_mesh.rotation.x += 0.01;
+    // main_mesh.rotation.z += 0.01; 
 
     main_mesh.translation.z = 5; 
 
     matrix4_t transformation_matrix = get_transformation_matrix(main_mesh.scale, main_mesh.rotation, main_mesh.translation); 
 
+    // array_push(triangle_buffer, simple_triangle); 
+    // return; 
+ 
     for (int i = 0; i < mesh_face_count; i++) {
         vec3_t vertices[3];
 
@@ -207,6 +212,10 @@ void update(void) {
         _triangle.projected_vertices[2] = get_perspective_projected_point(vertices[2], proj_m); 
         _triangle.projected_normal = get_perspective_projected_point(add_vec3(div_vec3(face_normal, 2), vertices[0]), proj_m); 
         _triangle.light_intensity = face_light_intensity; 
+
+        _triangle.uv[0] = main_mesh.faces[i].a_uv; 
+        _triangle.uv[1] = main_mesh.faces[i].b_uv; 
+        _triangle.uv[2] = main_mesh.faces[i].c_uv; 
 
         _triangle.z_depth = (vertices[0].z + vertices[1].z + vertices[2].z) / 3.0;  // set the z depth of the face to be the average of their z components
         _triangle.color = main_mesh.faces[i].color;
