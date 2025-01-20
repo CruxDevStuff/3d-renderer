@@ -204,18 +204,15 @@ barycentric_weights_t get_barrycentric_weights(vec2_t p, vec2_t a, vec2_t b, vec
 void paint_texture(vec2_t current_point, uint32_t*texture, vec2_t*parent_vertices, uv_t uv_0, uv_t uv_1, uv_t uv_2) {
     // get barycentric weights
     barycentric_weights_t w = get_barrycentric_weights(current_point, parent_vertices[0], parent_vertices[1], parent_vertices[2]); 
-    // scale each uv vector with correspoding weights
-    // printf("BARRY A: %f B: %f C: %f\n", w.a, w.b, w.c); 
-    // printf("SUM : %f\n", (w.a+w.b+w.c)); 
 
+    // scale u with texture width and v with texture height to get the coordinates in texture frame
     uv_t scaled_uv = {
         .u = (uv_0.u * w.a + uv_1.u * w.b + uv_2.u * w.c) * texture_width, 
         .v = (uv_0.v * w.a + uv_1.v * w.b + uv_2.v * w.c) * texture_height
     }; 
-    // scale u with texture width and v with texture height to get the coordinates in texture frame
     
-    // use texture frame to fetch correspoding color
-    int index = (int)(scaled_uv.v * texture_width) + (int)scaled_uv.u; 
+    // convert from uv frame to 1D index to fetch correspoding color
+    int index = ((int)scaled_uv.v * texture_width) + (int)scaled_uv.u; 
     uint32_t color = texture[index]; 
     draw_pixel(current_point.x, current_point.y, color); 
 }
