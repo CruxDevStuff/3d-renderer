@@ -51,13 +51,20 @@ void fill_flat_bottom_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2
         if (start.x < end.x) {
             for (int x=start.x; x < end.x; x++) {
                 vec2_t current_point = {.x=x, .y=start.y};
-                paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2); 
-                // draw_pixel(x, end.y, color); 
+                if (FILL_TYPE == TEXTURE) {
+                    paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2); 
+                } else if (FILL_TYPE == SOLID) {
+                    draw_pixel(x, end.y, color); 
+                }
             }
         } else if (end.x < start.x) {
             for (int x=end.x; x < start.x; x++) {
                 vec2_t current_point = {.x=x, .y=start.y};
-                paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2); 
+                if (FILL_TYPE == TEXTURE) {
+                    paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2); 
+                } else if (FILL_TYPE == SOLID) {
+                    draw_pixel(x, end.y, color); 
+                }
                 // draw_pixel(x, end.y, color); 
             }
         }
@@ -90,14 +97,20 @@ void fill_flat_top_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, v
         if (start.x < end.x) {
             for (int x=start.x; x < end.x; x++) {
                 vec2_t current_point = {.x=x, .y=start.y};
-                paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2); 
-                // draw_pixel(x, start.y, color); 
+                if (FILL_TYPE == TEXTURE) {
+                    paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2); 
+                } else if (FILL_TYPE == SOLID) {
+                    draw_pixel(x, end.y, color); 
+                }
             }
         } else if (end.x < start.x) {
             for (int x=end.x; x < start.x; x++) {
                 vec2_t current_point = {.x=x, .y=start.y};
-                paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2); 
-                // draw_pixel(x, end.y, color); 
+                if (FILL_TYPE == TEXTURE) {
+                    paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2); 
+                } else if (FILL_TYPE == SOLID) {
+                    draw_pixel(x, end.y, color); 
+                }
             }
         }
         // draw_line(start, end, 2, color); 

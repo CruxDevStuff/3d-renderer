@@ -31,7 +31,7 @@ triangle_t simple_triangle;
 
 typedef enum {
     SOLID,
-    TEXTURED
+    TEXTURE
 } fill_t; 
 
 #include "display.h"

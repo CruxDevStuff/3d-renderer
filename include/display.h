@@ -12,6 +12,7 @@ typedef struct {
     bool DRAW_WIREFRAME; 
     bool ENABLE_BACKFACE_CULLING; // flag to enable back face culling
     bool COLOR_FACES; 
+    bool TEXTURE_FACES; 
 } render_settings_t;
 
 extern SDL_Window *window; 

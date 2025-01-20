@@ -66,6 +66,8 @@ void handle_input(void) {
                     render_settings->COLOR_FACES = !(render_settings->COLOR_FACES); 
                     render_settings->DRAW_WIREFRAME = !(render_settings->DRAW_WIREFRAME); 
                     break;
+                case SDLK_t:
+                    render_settings->TEXTURE_FACES = !(render_settings->TEXTURE_FACES); 
                 default:
                     break;
             }
@@ -118,6 +120,7 @@ void render(void) {
         triangle_t cur_triangle = triangle_buffer[i];
         uint32_t outline_draw_color = get_light_intensity_adjusted_color(cur_triangle.color, cur_triangle.light_intensity);
         uint32_t raster_color = get_light_intensity_adjusted_color(cur_triangle.color, cur_triangle.light_intensity); 
+        fill_t shade_type = render_settings->TEXTURE_FACES ? TEXTURE : SOLID;
 
         // highlight wireframe if enabled        
         if (render_settings->DRAW_WIREFRAME) {
@@ -125,10 +128,14 @@ void render(void) {
         }
 
         // draw and fill triangle
-        if (render_settings->COLOR_FACES) {
-            fill_triangle(cur_triangle, raster_color, SOLID); 
+        if (shade_type == SOLID) {
+            draw_triangle(cur_triangle, outline_draw_color); 
         }
-        // draw_triangle(cur_triangle, outline_draw_color); 
+
+        if (render_settings->COLOR_FACES) {
+            fill_triangle(cur_triangle, raster_color, shade_type); 
+        }
+
 
         // draw normal lines
         if (render_settings->DRAW_FACE_NORMALS) {
