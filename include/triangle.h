@@ -19,7 +19,7 @@ typedef struct {
 } barycentric_weights_t;
 
 typedef struct {
-    vec2_t projected_vertices[3];
+    vec4_t projected_vertices[3];
     uv_t uv[3]; 
     vec2_t projected_normal; 
     uint32_t color; 
@@ -38,9 +38,9 @@ typedef enum {
 
 void fill_triangle(triangle_t triangle, uint32_t color, fill_t FILL_TYPE); 
 void draw_triangle(triangle_t triangle, uint32_t color);
-void fill_flat_bottom_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, vec2_t*parent_vertices ,uv_t uv_0, uv_t uv_1, uv_t uv_2, uint32_t color, fill_t FILL_TYPE);
-void fill_flat_top_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, vec2_t*parent_vertices, uv_t uv_0, uv_t uv_1, uv_t uv_2, uint32_t color, fill_t FILL_TYPE);
+void fill_flat_bottom_triangle(vec4_t vertex_0, vec4_t vertex_1, vec4_t vertex_2, vec4_t*parent_vertices ,uv_t uv_0, uv_t uv_1, uv_t uv_2, uint32_t color, fill_t FILL_TYPE);
+void fill_flat_top_triangle(vec4_t vertex_0, vec4_t vertex_1, vec4_t vertex_2, vec4_t*parent_vertices, uv_t uv_0, uv_t uv_1, uv_t uv_2, uint32_t color, fill_t FILL_TYPE);
 void draw_textured_triangle(triangle_t triangle, uint32_t* texture); 
-void paint_texture(vec2_t current_point, uint32_t*texture, vec2_t*parent_vertices, uv_t uv_0, uv_t uv_1, uv_t uv_2);
+void paint_texture(vec4_t current_point, uint32_t*texture, vec4_t*parent_vertices, uv_t uv_0, uv_t uv_1, uv_t uv_2);
 barycentric_weights_t get_barrycentric_weights(vec2_t p, vec2_t a, vec2_t b, vec2_t c); 
 #endif

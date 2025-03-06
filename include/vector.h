@@ -47,4 +47,5 @@ vec4_t get_homogeneous_from_vec3(vec3_t vec);
 vec3_t get_vec3_from_homogeneous(vec4_t vec); 
 
 void test_vector_ops(void); 
+vec2_t vec2_from_vec4(vec4_t v); 
 #endif 

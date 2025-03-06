@@ -139,7 +139,7 @@ void render(void) {
 
         // draw normal lines
         if (render_settings->DRAW_FACE_NORMALS) {
-            draw_line(cur_triangle.projected_vertices[0], cur_triangle.projected_normal, 1, 0xFF00FF00); 
+            draw_line(vec2_from_vec4(cur_triangle.projected_vertices[0]), cur_triangle.projected_normal, 1, 0xFF00FF00); 
         }
     }
 
@@ -170,10 +170,10 @@ void update(void) {
     triangle_t _triangle; 
     int mesh_face_count = array_length(main_mesh.faces); 
 
-    // main_mesh.rotation.y += 0.01; 
+    main_mesh.rotation.y += 0.01; 
     // main_mesh.rotation.x = M_PI/1; 
     main_mesh.rotation.x += 0.01;
-    // main_mesh.rotation.z += 0.01; 
+    main_mesh.rotation.z += 0.01; 
 
     main_mesh.translation.z = 5; 
 
@@ -217,7 +217,7 @@ void update(void) {
         _triangle.projected_vertices[0] = get_perspective_projected_point(vertices[0], proj_m); 
         _triangle.projected_vertices[1] = get_perspective_projected_point(vertices[1], proj_m); 
         _triangle.projected_vertices[2] = get_perspective_projected_point(vertices[2], proj_m); 
-        _triangle.projected_normal = get_perspective_projected_point(add_vec3(div_vec3(face_normal, 2), vertices[0]), proj_m); 
+        _triangle.projected_normal = vec2_from_vec4(get_perspective_projected_point(add_vec3(div_vec3(face_normal, 2), vertices[0]), proj_m)); 
         _triangle.light_intensity = face_light_intensity; 
 
         _triangle.uv[0] = main_mesh.faces[i].a_uv; 

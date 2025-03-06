@@ -107,7 +107,7 @@ matrix4_t get_perspective_proj_matrix(float fov, float aspect_ratio, float z_nea
     return proj;
 }
 
-vec2_t get_perspective_projected_point(vec3_t point, matrix4_t proj_m) {
+vec4_t get_perspective_projected_point(vec3_t point, matrix4_t proj_m) {
     vec4_t v = get_homogeneous_from_vec3(point); 
     v = mul_matrix4_vec4(proj_m, v); 
 
@@ -115,23 +115,22 @@ vec2_t get_perspective_projected_point(vec3_t point, matrix4_t proj_m) {
     if (v.w != 0) {
         v.x /= v.w; 
         v.y /= v.w; 
-        v.z /= v.w; 
     }
-    vec2_t r = {.x=v.x, .y=v.y}; 
+    // vec2_t r = {.x=v.x, .y=v.y}; 
 
     // NDC(-1, 1) to screen space
-    r.x *= window_width / 2.0; 
-    r.y *= window_height / 2.0; 
+    v.x *= window_width / 2.0; 
+    v.y *= window_height / 2.0; 
     // account for inverted screen space. mesh y values +y is bottom but +y in screen space is down;
-    r.y *= -1; 
+    v.y *= -1; 
     /* 
     screen origin (0, 0) is at top left while our 3D cartesian space origin (0,0,0) is middle of the screen, 
     translate all points to account for this offset between world and screen space
     */
-    r.x += window_width / 2.0; 
-    r.y += window_height / 2.0; 
+    v.x += window_width / 2.0; 
+    v.y += window_height / 2.0; 
 
-    return r; 
+    return v; 
 }
 
 matrix4_t get_transformation_matrix(vec3_t scale, vec3_t rotation, vec3_t translation) {

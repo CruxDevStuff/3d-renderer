@@ -125,6 +125,15 @@ vec3_t get_vec3_from_homogeneous(vec4_t vec) {
     return v; 
 }
 
+vec2_t vec2_from_vec4(vec4_t v) {
+    vec2_t r = {
+        .x = v.x, 
+        .y = v.y
+    }; 
+
+    return r; 
+}
+
 void test_vector_ops(void) {
     // this function is a masterclass on how to write shitty tests
 

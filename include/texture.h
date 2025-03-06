@@ -13,5 +13,5 @@ extern int texture_width;
 extern int texture_height;
 extern uint32_t* main_mesh_texture;
 extern const uint8_t REDBRICK_TEXTURE[];
-
+extern int tex_len; 
 #endif

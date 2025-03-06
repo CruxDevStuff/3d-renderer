@@ -22,19 +22,19 @@ void draw_triangle(triangle_t triangle, uint32_t color) {
     }
 
     // lines between vertices
-    draw_line(triangle.projected_vertices[0], triangle.projected_vertices[1], 2, color); 
-    draw_line(triangle.projected_vertices[1], triangle.projected_vertices[2], 2, color); 
-    draw_line(triangle.projected_vertices[2], triangle.projected_vertices[0], 2, color); 
+    draw_line(vec2_from_vec4(triangle.projected_vertices[0]), vec2_from_vec4(triangle.projected_vertices[1]), 2, color); 
+    draw_line(vec2_from_vec4(triangle.projected_vertices[1]), vec2_from_vec4(triangle.projected_vertices[2]), 2, color); 
+    draw_line(vec2_from_vec4(triangle.projected_vertices[2]), vec2_from_vec4(triangle.projected_vertices[0]), 2, color); 
 }
 
-void fill_flat_bottom_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, vec2_t*parent_vertices, uv_t uv_0, uv_t uv_1, uv_t uv_2, uint32_t color, fill_t FILL_TYPE) {
+void fill_flat_bottom_triangle(vec4_t vertex_0, vec4_t vertex_1, vec4_t vertex_2, vec4_t*parent_vertices, uv_t uv_0, uv_t uv_1, uv_t uv_2, uint32_t color, fill_t FILL_TYPE) {
     /*
     FILL UPPER TRIANGLE
     1. fill from top to bottom
     2. vertex 0(highest y after sorting) as the origin for the lines of the upper triangle
     */
-    vec2_t start = {.x=vertex_0.x, .y=vertex_0.y}; 
-    vec2_t end = {.x=vertex_0.x, .y=vertex_0.y}; 
+    vec4_t start = {.x=vertex_0.x, .y=vertex_0.y, .w=vertex_0.w}; 
+    vec4_t end = {.x=vertex_0.x, .y=vertex_0.y, .w=vertex_0.w}; 
 
     float u_dx_1 = vertex_0.x - vertex_1.x; 
     float u_dx_2 = vertex_2.x - vertex_0.x;
@@ -50,7 +50,7 @@ void fill_flat_bottom_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2
         // interpolate in x(left to right or right to left) and color pixel; 
         if (start.x < end.x) {
             for (int x=start.x; x < end.x; x++) {
-                vec2_t current_point = {.x=x, .y=start.y};
+                vec4_t current_point = {.x=x, .y=start.y, .w=start.w};
                 if (FILL_TYPE == TEXTURE) {
                     paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2); 
                 } else if (FILL_TYPE == SOLID) {
@@ -59,11 +59,11 @@ void fill_flat_bottom_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2
             }
         } else if (end.x < start.x) {
             for (int x=end.x; x < start.x; x++) {
-                vec2_t current_point = {.x=x, .y=start.y};
+                vec4_t current_point = {.x=x, .y=start.y, .w=start.w};
                 if (FILL_TYPE == TEXTURE) {
                     paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2); 
                 } else if (FILL_TYPE == SOLID) {
-                    draw_pixel(x, end.y, color); 
+                    draw_pixel(x, end.y, color);
                 }
                 // draw_pixel(x, end.y, color); 
             }
@@ -74,7 +74,7 @@ void fill_flat_bottom_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2
 
 }
 
-void fill_flat_top_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, vec2_t*parent_vertices, uv_t uv_0, uv_t uv_1, uv_t uv_2, uint32_t color, fill_t FILL_TYPE) {
+void fill_flat_top_triangle(vec4_t vertex_0, vec4_t vertex_1, vec4_t vertex_2, vec4_t*parent_vertices, uv_t uv_0, uv_t uv_1, uv_t uv_2, uint32_t color, fill_t FILL_TYPE) {
     /*
     FILL LOWER TRIANGLE
     1. fill from bottom to top
@@ -96,7 +96,7 @@ void fill_flat_top_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, v
         // interpolate in x(left to right or right to left) and color pixel; 
         if (start.x < end.x) {
             for (int x=start.x; x < end.x; x++) {
-                vec2_t current_point = {.x=x, .y=start.y};
+                vec4_t current_point = {.x=x, .y=start.y};
                 if (FILL_TYPE == TEXTURE) {
                     paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2); 
                 } else if (FILL_TYPE == SOLID) {
@@ -105,7 +105,7 @@ void fill_flat_top_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, v
             }
         } else if (end.x < start.x) {
             for (int x=end.x; x < start.x; x++) {
-                vec2_t current_point = {.x=x, .y=start.y};
+                vec4_t current_point = {.x=x, .y=start.y};
                 if (FILL_TYPE == TEXTURE) {
                     paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2); 
                 } else if (FILL_TYPE == SOLID) {
@@ -119,10 +119,10 @@ void fill_flat_top_triangle(vec2_t vertex_0, vec2_t vertex_1, vec2_t vertex_2, v
 
 void fill_triangle(triangle_t triangle, uint32_t color, fill_t FILL_TYPE) {
     // sort vertices by y coordinate
-    vec2_t vertex_0 = triangle.projected_vertices[0]; uv_t uv_0=triangle.uv[0]; 
-    vec2_t vertex_1 = triangle.projected_vertices[1]; uv_t uv_1=triangle.uv[1]; 
-    vec2_t vertex_2 = triangle.projected_vertices[2]; uv_t uv_2=triangle.uv[2]; 
-    vec2_t temp_v; uv_t temp_uv; 
+    vec4_t vertex_0 = triangle.projected_vertices[0]; uv_t uv_0=triangle.uv[0]; 
+    vec4_t vertex_1 = triangle.projected_vertices[1]; uv_t uv_1=triangle.uv[1]; 
+    vec4_t vertex_2 = triangle.projected_vertices[2]; uv_t uv_2=triangle.uv[2]; 
+    vec4_t temp_v; uv_t temp_uv; 
 
     // sort vertices by y (hight to low)
     if (vertex_0.y > vertex_1.y) {
@@ -155,7 +155,7 @@ void fill_triangle(triangle_t triangle, uint32_t color, fill_t FILL_TYPE) {
         uv_1 = temp_uv; 
     }
      
-    vec2_t parent_vertices[3];
+    vec4_t parent_vertices[3];
     parent_vertices[0] = vertex_0; 
     parent_vertices[1] = vertex_1; 
     parent_vertices[2] = vertex_2; 
@@ -176,7 +176,7 @@ void fill_triangle(triangle_t triangle, uint32_t color, fill_t FILL_TYPE) {
     between the line y=vertex1.y and the line between points vertex 0 and vertex 2.
     */  
     float mid_x = (((vertex_2.x - vertex_0.x) * (vertex_1.y - vertex_0.y)) / (vertex_2.y - vertex_0.y)) + vertex_0.x; 
-    vec2_t mid_point = {.x=mid_x, .y=vertex_1.y}; 
+    vec4_t mid_point = {.x=mid_x, .y=vertex_1.y}; 
 
     /*
         SPLIT TRIANGLE INTO LOWER AND UPPER TRIANGLES AND FILL EACH SEPARATELY 
@@ -214,18 +214,24 @@ barycentric_weights_t get_barrycentric_weights(vec2_t p, vec2_t a, vec2_t b, vec
 }
 
 
-void paint_texture(vec2_t current_point, uint32_t*texture, vec2_t*parent_vertices, uv_t uv_0, uv_t uv_1, uv_t uv_2) {
+void paint_texture(vec4_t current_point, uint32_t*texture, vec4_t*parent_vertices, uv_t uv_0, uv_t uv_1, uv_t uv_2) {
     // get barycentric weights
-    barycentric_weights_t w = get_barrycentric_weights(current_point, parent_vertices[0], parent_vertices[1], parent_vertices[2]); 
+    barycentric_weights_t w = get_barrycentric_weights(vec2_from_vec4(current_point), vec2_from_vec4(parent_vertices[0]), vec2_from_vec4(parent_vertices[1]), vec2_from_vec4(parent_vertices[2])); 
+
+
+    float w_inverse = (1 / parent_vertices[0].w) * w.a + (1 / parent_vertices[1].w) * w.b + (1 / parent_vertices[2].w) * w.c;
 
     // scale u with texture width and v with texture height to get the coordinates in texture frame
     uv_t scaled_uv = {
-        .u = (uv_0.u * w.a + uv_1.u * w.b + uv_2.u * w.c) * texture_width, 
-        .v = (uv_0.v * w.a + uv_1.v * w.b + uv_2.v * w.c) * texture_height
+        .u = ((((uv_0.u / parent_vertices[0].w) * w.a + (uv_1.u / parent_vertices[1].w) * w.b + (uv_2.u / parent_vertices[2].w) * w.c)) * texture_width) / w_inverse,
+        .v = ((((uv_0.v / parent_vertices[0].w) * w.a + (uv_1.v / parent_vertices[1].w) * w.b + (uv_2.v / parent_vertices[2].w) * w.c)) * texture_height) / w_inverse,
     }; 
-    
+
     // convert from uv frame to 1D index to fetch correspoding color
     int index = ((int)scaled_uv.v * texture_width) + (int)scaled_uv.u; 
+    // if (index >= tex_len) {
+    //     printf(tex_len); 
+    // }
     uint32_t color = texture[index]; 
     draw_pixel(current_point.x, current_point.y, color); 
 }
