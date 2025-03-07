@@ -205,9 +205,9 @@ barycentric_weights_t get_barrycentric_weights(vec2_t p, vec2_t a, vec2_t b, vec
     float _c = 1 - _a - _b; 
 
     barycentric_weights_t w = {
-        .a = _a,
-        .b = _b,
-        .c = _c 
+        .a = fabs(_a),
+        .b = fabs(_b),
+        .c = fabs(_c) 
     }; 
 
     return w; 
@@ -229,9 +229,7 @@ void paint_texture(vec4_t current_point, uint32_t*texture, vec4_t*parent_vertice
 
     // convert from uv frame to 1D index to fetch correspoding color
     int index = ((int)scaled_uv.v * texture_width) + (int)scaled_uv.u; 
-    // if (index >= tex_len) {
-    //     printf(tex_len); 
-    // }
     uint32_t color = texture[index]; 
+
     draw_pixel(current_point.x, current_point.y, color); 
 }
