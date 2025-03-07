@@ -31,9 +31,10 @@ void setup(void) {
         return;
     }
 
-    frame_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, window_width, window_height); 
+    frame_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, window_width, window_height); 
     proj_m = get_perspective_proj_matrix(M_PI/3, aspect_ratio, 0.05, 100); 
-    main_mesh_texture = (uint32_t*)REDBRICK_TEXTURE; 
+    // main_mesh_texture = (uint32_t*)REDBRICK_TEXTURE; 
+    main_mesh_texture = load_texture_from_png("./cube.png"); 
 }
 
 void handle_input(void) {
@@ -153,6 +154,7 @@ void render(void) {
 void cleanup(void) {
     free(frame_buffer);
     free(triangle_buffer); 
+    upng_free(png_texture); 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

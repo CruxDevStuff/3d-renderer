@@ -9,6 +9,7 @@
         "complex": "c",
         "light.h": "c",
         "texture.h": "c",
-        "matrix.h": "c"
+        "matrix.h": "c",
+        "upng.h": "c"
     }
 }

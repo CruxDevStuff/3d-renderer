@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include "upng.h"
 
 typedef struct {
     float u;
@@ -12,6 +13,7 @@ typedef struct {
 extern int texture_width;
 extern int texture_height;
 extern uint32_t* main_mesh_texture;
+extern upng_t* png_texture; 
 extern const uint8_t REDBRICK_TEXTURE[];
-extern int tex_len; 
+uint32_t* load_texture_from_png(char* filename);
 #endif
