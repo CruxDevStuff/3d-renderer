@@ -1,7 +1,7 @@
 ## 3D software renderer from sratch in C (just for fun)
 
 ### Build and Run 
-```make build && ./renderer "/Users/aadhi/Developer/3d-renderer/HAL Tejas.obj"```
+```make build && ./renderer f22.obj"```
 
 ## Preview
 ### Wireframe
