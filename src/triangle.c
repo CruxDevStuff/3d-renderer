@@ -113,7 +113,6 @@ void fill_flat_top_triangle(vec4_t vertex_0, vec4_t vertex_1, vec4_t vertex_2, v
                 }
             }
         }
-        // draw_line(start, end, 2, color); 
     }
 }
 
@@ -123,6 +122,11 @@ void fill_triangle(triangle_t triangle, uint32_t color, fill_t FILL_TYPE) {
     vec4_t vertex_1 = triangle.projected_vertices[1]; uv_t uv_1=triangle.uv[1]; 
     vec4_t vertex_2 = triangle.projected_vertices[2]; uv_t uv_2=triangle.uv[2]; 
     vec4_t temp_v; uv_t temp_uv; 
+
+    // correct for flipped V coordinate because of different origin point interpretation in the obj file 
+    uv_0.v = 1.0 - uv_0.v;
+    uv_1.v = 1.0 - uv_1.v;
+    uv_2.v = 1.0 - uv_2.v;
 
     // sort vertices by y (hight to low)
     if (vertex_0.y > vertex_1.y) {

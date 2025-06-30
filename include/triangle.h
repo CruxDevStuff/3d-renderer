@@ -6,9 +6,7 @@
 
 typedef struct {
     int a, b, c; 
-    uv_t a_uv; 
-    uv_t b_uv; 
-    uv_t c_uv; 
+    uv_t a_uv, b_uv, c_uv; 
     uint32_t color; 
 } face_t; 
 

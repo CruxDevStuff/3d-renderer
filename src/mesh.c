@@ -1,5 +1,7 @@
 #include "mesh.h"
 
+uv_t* temp_uv_array = NULL; 
+
 vec3_t cube_vertices[8] = {
     {.x=-1, .y=-1, .z=-1}, 
     {.x=-1, .y= 1, .z=-1}, 
@@ -70,18 +72,36 @@ mesh_t* load_obj_file(char *filename) {
             point.z = atof(token_values[3]); 
             array_push(mesh->vertices, point); 
         } 
+        // handle uv coordinates
+        else if (!strcmp(id, "vt")) {
+            // store all uv coordinates in a temp array in this step and assign from this array in the "face" parsing step
+            uv_t uv_cord; 
+            uv_cord.u = atof(token_values[1]); 
+            uv_cord.v = atof(token_values[2]); 
+            array_push(temp_uv_array, uv_cord); 
+        }
         // handle face data
         else if (!strcmp(id, "f")) {
             face_t face; 
             // set vertex indices
             face.a = atoi(strtok(token_values[1], "/")); 
+            int a_uv_idx = atoi(strtok(NULL, "/")); 
+            face.a_uv = temp_uv_array[a_uv_idx-1]; 
+
             face.b = atoi(strtok(token_values[2], "/")); 
+            int b_uv_idx = atoi(strtok(NULL, "/")); 
+            face.b_uv = temp_uv_array[b_uv_idx-1]; 
+
             face.c = atoi(strtok(token_values[3], "/")); 
+            int c_uv_idx = atoi(strtok(NULL, "/")); 
+            face.c_uv = temp_uv_array[c_uv_idx-1]; 
+
             face.color = 0xFFFFFFFF; // set all faces to white for now
             array_push(mesh->faces, face); 
         }
-    }
 
+    }
+    int uv_buffer_len = array_length(temp_uv_array); 
     mesh->scale = default_scale; 
     mesh->rotation = default_rotation; 
     mesh->translation = default_translation; 

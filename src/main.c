@@ -33,8 +33,6 @@ void setup(void) {
 
     frame_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, window_width, window_height); 
     proj_m = get_perspective_proj_matrix(M_PI/3, aspect_ratio, 0.05, 100); 
-    // main_mesh_texture = (uint32_t*)REDBRICK_TEXTURE; 
-    main_mesh_texture = load_texture_from_png("./cube.png"); 
 }
 
 void handle_input(void) {
@@ -244,10 +242,20 @@ int main(int argc, char* argv[]) {
     running = create_window(); 
     setup(); 
 
-    mesh_t *model = load_obj_file(argv[1]); 
+    const char *model_file_path = argv[1]; 
+    int path_len = strlen(model_file_path); 
+    mesh_t *model = load_obj_file(model_file_path); 
 
     if (model != NULL) {
         main_mesh = *model;
+
+        // NOTE: texture file should be .png with the same name and at the same location as the .obj file
+        // main_mesh_texture = (uint32_t*)REDBRICK_TEXTURE; 
+        char *texture_file_path = malloc(strlen(argv[1]) + 1);
+        strcpy(texture_file_path, argv[1]); 
+        char *extension_delimeter = strrchr(texture_file_path, '.')+1; 
+        strncpy(extension_delimeter, "png", 3); 
+        main_mesh_texture = load_texture_from_png(texture_file_path); 
     }
 
     while (running) {
