@@ -3,6 +3,7 @@
 SDL_Window *window = NULL; 
 SDL_Renderer *renderer = NULL; 
 uint32_t *frame_buffer = NULL; 
+double *z_buffer = NULL; 
 SDL_Texture *frame_buffer_texture = NULL; 
 render_settings_t *render_settings = NULL;
 
@@ -50,7 +51,7 @@ bool create_window(void) {
     render_settings->ENABLE_BACKFACE_CULLING = true; 
     render_settings->DRAW_WIREFRAME = false; 
     render_settings->COLOR_FACES = true; 
-
+    render_settings->TEXTURE_FACES = true; 
     return true; 
 }
 

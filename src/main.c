@@ -27,12 +27,21 @@ global_light_t global_light = {
 
 void setup(void) {
     frame_buffer = (uint32_t*)malloc((sizeof(uint32_t)) * (window_width * window_height)); 
+
     if (frame_buffer == NULL) {
         return;
     }
 
     frame_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, window_width, window_height); 
-    proj_m = get_perspective_proj_matrix(M_PI/3, aspect_ratio, 0.05, 100); 
+    proj_m = get_perspective_proj_matrix(M_PI/3, aspect_ratio, 0.1, 100); 
+
+    // initialize z buffer to max depth value(100)
+    size_t z_buffer_size = (sizeof(double)) * (window_width * window_height);
+    z_buffer = (double*)malloc(z_buffer_size); 
+    for (int i = 0; i < (window_width * window_height); i++) {
+        z_buffer[i] = 100.0; 
+    }
+
 }
 
 void handle_input(void) {
@@ -109,11 +118,19 @@ int z_compare(const void* a, const void* b) {
     return 0; 
 }
 
+void clear_z_buffer() {
+    for (int i = 0; i < (window_width * window_height); i++) {
+        z_buffer[i] = 100.0; 
+    }
+}
+
 void render(void) {
     int triangle_count = array_length(triangle_buffer); 
 
     // sort triangle by depth high to low
     qsort(triangle_buffer, triangle_count, sizeof(triangle_t), z_compare); 
+
+    clear_z_buffer(); 
 
     for (int i = 0; i < triangle_count; i++) {
         triangle_t cur_triangle = triangle_buffer[i];
@@ -127,9 +144,9 @@ void render(void) {
         }
 
         // draw and fill triangle
-        if (shade_type == SOLID) {
-            draw_triangle(cur_triangle, outline_draw_color); 
-        }
+        // if (shade_type == SOLID) {
+        //     draw_triangle(cur_triangle, outline_draw_color); 
+        // }
 
         if (render_settings->COLOR_FACES) {
             fill_triangle(cur_triangle, raster_color, shade_type); 
@@ -171,6 +188,7 @@ void update(void) {
     int mesh_face_count = array_length(main_mesh.faces); 
 
     main_mesh.rotation.y += 0.01; 
+    // main_mesh.rotation.y = M_PI/3; 
     // main_mesh.rotation.x = M_PI/1; 
     main_mesh.rotation.x += 0.01;
     main_mesh.rotation.z += 0.01; 
@@ -178,7 +196,7 @@ void update(void) {
     main_mesh.translation.z = 5; 
 
     matrix4_t transformation_matrix = get_transformation_matrix(main_mesh.scale, main_mesh.rotation, main_mesh.translation); 
-
+    
     // array_push(triangle_buffer, simple_triangle); 
     // return; 
  
@@ -251,6 +269,7 @@ int main(int argc, char* argv[]) {
 
         // NOTE: texture file should be .png with the same name and at the same location as the .obj file
         // main_mesh_texture = (uint32_t*)REDBRICK_TEXTURE; 
+        // TODO: extract texture width and height from file meta deta
         char *texture_file_path = malloc(strlen(argv[1]) + 1);
         strcpy(texture_file_path, argv[1]); 
         char *extension_delimeter = strrchr(texture_file_path, '.')+1; 

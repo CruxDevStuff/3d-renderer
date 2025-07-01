@@ -51,20 +51,12 @@ void fill_flat_bottom_triangle(vec4_t vertex_0, vec4_t vertex_1, vec4_t vertex_2
         if (start.x < end.x) {
             for (int x=start.x; x < end.x; x++) {
                 vec4_t current_point = {.x=x, .y=start.y, .w=start.w};
-                if (FILL_TYPE == TEXTURE) {
-                    paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2); 
-                } else if (FILL_TYPE == SOLID) {
-                    draw_pixel(x, end.y, color); 
-                }
+                paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2, FILL_TYPE, color); 
             }
         } else if (end.x < start.x) {
             for (int x=end.x; x < start.x; x++) {
                 vec4_t current_point = {.x=x, .y=start.y, .w=start.w};
-                if (FILL_TYPE == TEXTURE) {
-                    paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2); 
-                } else if (FILL_TYPE == SOLID) {
-                    draw_pixel(x, end.y, color);
-                }
+                paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2, FILL_TYPE, color); 
                 // draw_pixel(x, end.y, color); 
             }
         }
@@ -97,20 +89,13 @@ void fill_flat_top_triangle(vec4_t vertex_0, vec4_t vertex_1, vec4_t vertex_2, v
         if (start.x < end.x) {
             for (int x=start.x; x < end.x; x++) {
                 vec4_t current_point = {.x=x, .y=start.y};
-                if (FILL_TYPE == TEXTURE) {
-                    paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2); 
-                } else if (FILL_TYPE == SOLID) {
-                    draw_pixel(x, end.y, color); 
-                }
+                // TODO: check z buffer before draw call 
+                paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2, FILL_TYPE, color); 
             }
         } else if (end.x < start.x) {
             for (int x=end.x; x < start.x; x++) {
                 vec4_t current_point = {.x=x, .y=start.y};
-                if (FILL_TYPE == TEXTURE) {
-                    paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2); 
-                } else if (FILL_TYPE == SOLID) {
-                    draw_pixel(x, end.y, color); 
-                }
+                paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2, FILL_TYPE, color); 
             }
         }
     }
@@ -218,22 +203,35 @@ barycentric_weights_t get_barrycentric_weights(vec2_t p, vec2_t a, vec2_t b, vec
 }
 
 
-void paint_texture(vec4_t current_point, uint32_t*texture, vec4_t*parent_vertices, uv_t uv_0, uv_t uv_1, uv_t uv_2) {
+void paint_texture(vec4_t current_point, uint32_t*texture, vec4_t*parent_vertices, uv_t uv_0, uv_t uv_1, uv_t uv_2, fill_t fill_type, uint32_t solid_fill_color) {
     // get barycentric weights
     barycentric_weights_t w = get_barrycentric_weights(vec2_from_vec4(current_point), vec2_from_vec4(parent_vertices[0]), vec2_from_vec4(parent_vertices[1]), vec2_from_vec4(parent_vertices[2])); 
 
+    double w_inverse = (1 / parent_vertices[0].w) * w.a + (1 / parent_vertices[1].w) * w.b + (1 / parent_vertices[2].w) * w.c;
 
-    float w_inverse = (1 / parent_vertices[0].w) * w.a + (1 / parent_vertices[1].w) * w.b + (1 / parent_vertices[2].w) * w.c;
+    // z buffering. set the specfic pixel to the front most polygon's texture color 
+    int z_idx = ((int)current_point.y * window_width) + (int)current_point.x; 
+    double interpolated_z = 1 / w_inverse; 
+    
+    if (interpolated_z <= z_buffer[z_idx]) {
 
-    // scale u with texture width and v with texture height to get the coordinates in texture frame
-    uv_t scaled_uv = {
-        .u = ((((uv_0.u / parent_vertices[0].w) * w.a + (uv_1.u / parent_vertices[1].w) * w.b + (uv_2.u / parent_vertices[2].w) * w.c)) * texture_width) / w_inverse,
-        .v = ((((uv_0.v / parent_vertices[0].w) * w.a + (uv_1.v / parent_vertices[1].w) * w.b + (uv_2.v / parent_vertices[2].w) * w.c)) * texture_height) / w_inverse,
-    }; 
+        z_buffer[z_idx] = interpolated_z; 
 
-    // convert from uv frame to 1D index to fetch correspoding color
-    int index = ((int)scaled_uv.v * texture_width) + (int)scaled_uv.u; 
-    uint32_t color = texture[index]; 
+        if (fill_type == TEXTURE) {
+            // scale u with texture width and v with texture height to get the coordinates in texture frame
+            uv_t scaled_uv = {
+                .u = ((((uv_0.u / parent_vertices[0].w) * w.a + (uv_1.u / parent_vertices[1].w) * w.b + (uv_2.u / parent_vertices[2].w) * w.c)) * texture_width) / w_inverse,
+                .v = ((((uv_0.v / parent_vertices[0].w) * w.a + (uv_1.v / parent_vertices[1].w) * w.b + (uv_2.v / parent_vertices[2].w) * w.c)) * texture_height) / w_inverse,
+            }; 
 
-    draw_pixel(current_point.x, current_point.y, color); 
+            // convert from uv frame to 1D index to fetch correspoding color
+            int index = ((int)scaled_uv.v * texture_width) + (int)scaled_uv.u; 
+            uint32_t color = texture[index]; 
+
+            draw_pixel(current_point.x, current_point.y, color); 
+        } 
+        else if (fill_type == SOLID) {
+            draw_pixel(current_point.x, current_point.y, solid_fill_color); 
+        }
+    }
 }

@@ -101,8 +101,8 @@ matrix4_t get_perspective_proj_matrix(float fov, float aspect_ratio, float z_nea
     proj.values[0][0] = aspect_ratio * f; 
     proj.values[1][1] = f; 
     proj.values[2][2] = z_far / (z_far - z_near); 
-    proj.values[2][3] = (-(z_far * z_near)) / (z_far - z_near); 
-    proj.values[3][2] = 1; 
+    proj.values[2][3] = (-z_far * z_near) / (z_far - z_near); 
+    proj.values[3][2] = 1.0; 
 
     return proj;
 }

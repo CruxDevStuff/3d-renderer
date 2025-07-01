@@ -39,6 +39,6 @@ void draw_triangle(triangle_t triangle, uint32_t color);
 void fill_flat_bottom_triangle(vec4_t vertex_0, vec4_t vertex_1, vec4_t vertex_2, vec4_t*parent_vertices ,uv_t uv_0, uv_t uv_1, uv_t uv_2, uint32_t color, fill_t FILL_TYPE);
 void fill_flat_top_triangle(vec4_t vertex_0, vec4_t vertex_1, vec4_t vertex_2, vec4_t*parent_vertices, uv_t uv_0, uv_t uv_1, uv_t uv_2, uint32_t color, fill_t FILL_TYPE);
 void draw_textured_triangle(triangle_t triangle, uint32_t* texture); 
-void paint_texture(vec4_t current_point, uint32_t*texture, vec4_t*parent_vertices, uv_t uv_0, uv_t uv_1, uv_t uv_2);
+void paint_texture(vec4_t current_point, uint32_t*texture, vec4_t*parent_vertices, uv_t uv_0, uv_t uv_1, uv_t uv_2, fill_t fill_type, uint32_t solid_fill_color); 
 barycentric_weights_t get_barrycentric_weights(vec2_t p, vec2_t a, vec2_t b, vec2_t c); 
 #endif
