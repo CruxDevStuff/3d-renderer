@@ -3,12 +3,14 @@
 const int cube_side = 9; 
 const int POINT_N = cube_side * cube_side * cube_side;
 const int FOV_SCALE_FACTOR = 600; 
-const int FPS = 30;
+const int FPS = 10;
 const int frame_time = (1000 / FPS); 
 
-vec3_t origin = {.x=0, .y=0, .z=0}; 
 uint32_t frame_wait_time;
 uint32_t previous_frame_time = 0; 
+float delta_time; 
+float delta_time_scale_factor; 
+uint32_t wait_time; 
 
 // data in this mesh will rendered every frame, initialized before the game loop
 mesh_t main_mesh; 
@@ -16,7 +18,7 @@ mesh_t main_mesh;
 triangle_t* triangle_buffer = NULL; 
 matrix4_t proj_m; 
 
-
+vec3_t origin = {.x=0, .y=0, .z=0}; 
 camera_t main_camera = {.look_at={.x=0, .y=0, .z=5}}; 
 const vec3_t up = {.x=0, .y=1, .z=0}; 
 
@@ -207,16 +209,18 @@ matrix4_t get_camera_view_matrix(camera_t camera) {
     return view_matrix; 
 }
 
-void camera_look_at(camera_t *camera, vec3_t look_at) {
-
-}
-
 void update(void) {
-    int wait_time = frame_time - (SDL_GetTicks() - previous_frame_time); 
+    delta_time = SDL_GetTicks() - previous_frame_time;
+
+    wait_time = frame_time - delta_time; 
     frame_wait_time = wait_time; // just a global copy of local wait time, servers no purpose
+
     if (wait_time > 0 && wait_time <= frame_time) {
         SDL_Delay(wait_time); 
     }
+
+    delta_time = SDL_GetTicks() - previous_frame_time;
+    delta_time_scale_factor = delta_time / 1000.0; 
     previous_frame_time = SDL_GetTicks(); 
 
     triangle_buffer = NULL; 
@@ -231,9 +235,9 @@ void update(void) {
 
     main_mesh.translation.z = 5; 
     // look_at.z = 5;
-    main_camera.position.x += 0.05;
-    // main_camera.position.z += 0.05; 
-    main_camera.position.y += 0.05;
+    main_camera.position.x += 1.5 * delta_time_scale_factor;
+    // main_camera.position.z += 0.05 * delta_time_scale_factor; 
+    main_camera.position.y += 1.5 * delta_time_scale_factor;
 
     // matrix to transform(rotate + translate) the vertices in the global reference frame 
     matrix4_t mesh_transformation_matrix = get_transformation_matrix(main_mesh.scale, main_mesh.rotation, main_mesh.translation); 
