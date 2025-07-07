@@ -22,6 +22,12 @@ typedef struct {
     vec3_t scale; 
 } mesh_t; 
 
+typedef struct {
+    vec3_t position; 
+    vec3_t rotation; 
+    vec3_t look_at; 
+} camera_t; 
+
 mesh_t* load_obj_file(char *filename); 
 mesh_t* load_cube_data(void); 
 #endif 

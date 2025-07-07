@@ -6,8 +6,6 @@ const int FOV_SCALE_FACTOR = 600;
 const int FPS = 30;
 const int frame_time = (1000 / FPS); 
 
-vec3_t rotation = {.x=0, .y=0, .z=0}; 
-vec3_t camera_position = {.x=0, .y=0, .z=0}; 
 vec3_t origin = {.x=0, .y=0, .z=0}; 
 uint32_t frame_wait_time;
 uint32_t previous_frame_time = 0; 
@@ -17,6 +15,10 @@ mesh_t main_mesh;
 // main dynamic array that holds all the triangles to draw in the render step
 triangle_t* triangle_buffer = NULL; 
 matrix4_t proj_m; 
+
+
+camera_t main_camera = {.look_at={.x=0, .y=0, .z=5}}; 
+const vec3_t up = {.x=0, .y=1, .z=0}; 
 
 // light from middle of the screen
 global_light_t global_light = {
@@ -41,7 +43,9 @@ void setup(void) {
     for (int i = 0; i < (window_width * window_height); i++) {
         z_buffer[i] = 100.0; 
     }
-
+    // translation is inverted, the model should move to the left when camera moves to right(+ve X)
+    vec3_t pos = {.x=0, .y=0, .z=0}; 
+    main_camera.position = pos; 
 }
 
 void handle_input(void) {
@@ -144,9 +148,9 @@ void render(void) {
         }
 
         // draw and fill triangle
-        // if (shade_type == SOLID) {
-        //     draw_triangle(cur_triangle, outline_draw_color); 
-        // }
+        if (shade_type == SOLID) {
+            draw_triangle(cur_triangle, outline_draw_color); 
+        }
 
         if (render_settings->COLOR_FACES) {
             fill_triangle(cur_triangle, raster_color, shade_type); 
@@ -175,6 +179,38 @@ void cleanup(void) {
     SDL_Quit();
 }
 
+matrix4_t get_camera_view_matrix(camera_t camera) {
+    vec3_t look_vector = sub_vec3(camera.look_at, camera.position);
+
+    vec3_t z = get_normalized_vector(look_vector); 
+    vec3_t x = get_normalized_vector(get_crossproduct(up, z)); 
+    vec3_t y = get_crossproduct(z, x); 
+
+    matrix4_t view_matrix = {.values = {0}};
+    view_matrix.values[0][0] = x.x; 
+    view_matrix.values[0][1] = x.y; 
+    view_matrix.values[0][2] = x.z; 
+    view_matrix.values[0][3] = -(get_dotproduct(x, camera.position)); 
+
+    view_matrix.values[1][0] = y.x; 
+    view_matrix.values[1][1] = y.y; 
+    view_matrix.values[1][2] = y.z; 
+    view_matrix.values[1][3] = -(get_dotproduct(y, camera.position)); 
+
+    view_matrix.values[2][0] = z.x; 
+    view_matrix.values[2][1] = z.y; 
+    view_matrix.values[2][2] = z.z; 
+    view_matrix.values[2][3] = -(get_dotproduct(z, camera.position));
+
+    view_matrix.values[3][3] = 1.0; 
+
+    return view_matrix; 
+}
+
+void camera_look_at(camera_t *camera, vec3_t look_at) {
+
+}
+
 void update(void) {
     int wait_time = frame_time - (SDL_GetTicks() - previous_frame_time); 
     frame_wait_time = wait_time; // just a global copy of local wait time, servers no purpose
@@ -187,16 +223,27 @@ void update(void) {
     triangle_t _triangle; 
     int mesh_face_count = array_length(main_mesh.faces); 
 
-    main_mesh.rotation.y += 0.01; 
-    // main_mesh.rotation.y = M_PI/3; 
-    // main_mesh.rotation.x = M_PI/1; 
-    main_mesh.rotation.x += 0.01;
-    main_mesh.rotation.z += 0.01; 
+    // main_mesh.rotation.y += 0.01; 
+    // main_mesh.rotation.y = -(M_PI/2); 
+    // main_mesh.rotation.x = M_PI/1;                       
+    // main_mesh.rotation.x += 0.01;
+    // main_mesh.rotation.z += 0.01; 
 
     main_mesh.translation.z = 5; 
+    // look_at.z = 5;
+    main_camera.position.x += 0.05;
+    // main_camera.position.z += 0.05; 
+    main_camera.position.y += 0.05;
 
-    matrix4_t transformation_matrix = get_transformation_matrix(main_mesh.scale, main_mesh.rotation, main_mesh.translation); 
-    
+    // matrix to transform(rotate + translate) the vertices in the global reference frame 
+    matrix4_t mesh_transformation_matrix = get_transformation_matrix(main_mesh.scale, main_mesh.rotation, main_mesh.translation); 
+
+    // matrix transform the vertices to given camera frame using a view matrix
+    matrix4_t view_matrix = get_camera_view_matrix(main_camera);
+
+    // combine both global and camera view matrices 
+    matrix4_t final_transformation_matrix = mul_matrix4_matrix4(view_matrix, mesh_transformation_matrix);
+
     // array_push(triangle_buffer, simple_triangle); 
     // return; 
  
@@ -207,9 +254,9 @@ void update(void) {
         vertices[1] =  main_mesh.vertices[main_mesh.faces[i].b - 1];
         vertices[2] =  main_mesh.vertices[main_mesh.faces[i].c - 1]; 
         
-        vertices[0] = get_vec3_from_homogeneous(mul_matrix4_vec4(transformation_matrix, get_homogeneous_from_vec3(vertices[0]))); 
-        vertices[1] = get_vec3_from_homogeneous(mul_matrix4_vec4(transformation_matrix, get_homogeneous_from_vec3(vertices[1]))); 
-        vertices[2] = get_vec3_from_homogeneous(mul_matrix4_vec4(transformation_matrix, get_homogeneous_from_vec3(vertices[2]))); 
+        vertices[0] = get_vec3_from_homogeneous(mul_matrix4_vec4(final_transformation_matrix, get_homogeneous_from_vec3(vertices[0]))); 
+        vertices[1] = get_vec3_from_homogeneous(mul_matrix4_vec4(final_transformation_matrix, get_homogeneous_from_vec3(vertices[1]))); 
+        vertices[2] = get_vec3_from_homogeneous(mul_matrix4_vec4(final_transformation_matrix, get_homogeneous_from_vec3(vertices[2]))); 
 
         /*
         BACK FACE CULLING - ONLY RENDER FACES THAT ARE FACING THE CAMERA
@@ -222,7 +269,7 @@ void update(void) {
         vec3_t ab = sub_vec3(vertices[1], vertices[0]); 
         vec3_t ac = sub_vec3(vertices[2], vertices[0]); 
 
-        vec3_t face_to_cam_ray = get_normalized_vector(sub_vec3(camera_position, vertices[0])); 
+        vec3_t face_to_cam_ray = get_normalized_vector(sub_vec3(origin, vertices[0])); 
         vec3_t face_normal = get_normalized_vector(get_crossproduct(ab, ac)); 
 
         float cam_face_align = get_dotproduct(face_to_cam_ray, face_normal); 
