@@ -212,7 +212,12 @@ void paint_texture(vec4_t current_point, uint32_t*texture, vec4_t*parent_vertice
     // z buffering. set the specfic pixel to the front most polygon's texture color 
     int z_idx = ((int)current_point.y * window_width) + (int)current_point.x; 
     double interpolated_z = 1 / w_inverse; 
-    
+
+    // prevent overflow / invalid access
+    if (z_idx > (z_buffer_n - 1) || z_idx < 0) {
+        return; 
+    }
+
     if (interpolated_z <= z_buffer[z_idx]) {
 
         z_buffer[z_idx] = interpolated_z; 
@@ -226,6 +231,12 @@ void paint_texture(vec4_t current_point, uint32_t*texture, vec4_t*parent_vertice
 
             // convert from uv frame to 1D index to fetch correspoding color
             int index = ((int)scaled_uv.v * texture_width) + (int)scaled_uv.u; 
+            
+            // prevent overflow / invalid access
+            if (index > (texture_buffer_n-1) || index < 0) {
+                return; 
+            }
+
             uint32_t color = texture[index]; 
 
             draw_pixel(current_point.x, current_point.y, color); 

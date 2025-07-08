@@ -7,6 +7,7 @@
 #include "matrix.h"
 #include "upng.h"
 #include "light.h"
+#include "texture.h"
 
 bool running = false; 
 void setup(void); 
@@ -16,3 +17,6 @@ void cleanup(void);
 void update(void); 
 void clear_z_buffer(); 
 uint32_t wireframe_color = 0xFF00FF00;
+
+extern int texture_buffer_n;
+extern int z_buffer_n;

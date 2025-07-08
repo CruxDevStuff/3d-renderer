@@ -3,7 +3,7 @@
 const int cube_side = 9; 
 const int POINT_N = cube_side * cube_side * cube_side;
 const int FOV_SCALE_FACTOR = 600; 
-const int FPS = 10;
+const int FPS = 100;
 const int frame_time = (1000 / FPS); 
 
 uint32_t frame_wait_time;
@@ -19,7 +19,7 @@ triangle_t* triangle_buffer = NULL;
 matrix4_t proj_m; 
 
 vec3_t origin = {.x=0, .y=0, .z=0}; 
-camera_t main_camera = {.look_at={.x=0, .y=0, .z=5}}; 
+camera_t main_camera = {.look_at={.x=0, .y=0, .z=1}}; 
 const vec3_t up = {.x=0, .y=1, .z=0}; 
 
 // light from middle of the screen
@@ -48,9 +48,47 @@ void setup(void) {
     // translation is inverted, the model should move to the left when camera moves to right(+ve X)
     vec3_t pos = {.x=0, .y=0, .z=0}; 
     main_camera.position = pos; 
+
+    z_buffer_n = window_height * window_width; 
+    texture_buffer_n = texture_height * texture_width; 
 }
 
 void handle_input(void) {
+    // Simple FPS camera movement using Arrow keys
+
+    const uint8_t* state = SDL_GetKeyboardState(NULL);
+
+    if (state[SDL_SCANCODE_UP]) {
+        main_camera.position.z += 1.5 * delta_time_scale_factor; 
+    }
+
+    if (state[SDL_SCANCODE_DOWN]) {
+        main_camera.position.z -= 1.5 * delta_time_scale_factor; 
+    }
+
+    // if (state[SDL_SCANCODE_LEFT]) {
+    //     main_camera.position.x -= 1.5 * delta_time_scale_factor; 
+    // }
+
+    // if (state[SDL_SCANCODE_RIGHT]) {
+    //     main_camera.position.x += 1.5 * delta_time_scale_factor; 
+    // }
+
+    // if (state[SDL_SCANCODE_A]) {
+    //     main_camera.rotation.y -= 0.5 * delta_time_scale_factor; 
+    // }
+
+    // if (state[SDL_SCANCODE_D]) {
+    //     main_camera.rotation.y += 0.5 * delta_time_scale_factor; 
+    // }
+
+    // update camera look vector
+    // main_camera.look_at.x = main_camera.position.x; 
+    // matrix4_t look_vector_rotation_matrix = get_rotation_matrix(main_camera.rotation); 
+    // main_camera.look_at = get_vec3_from_homogeneous(mul_matrix4_vec4(look_vector_rotation_matrix, get_homogeneous_from_vec3(main_camera.look_at))); 
+
+    main_camera.look_at = add_vec3(main_camera.look_at, main_camera.position); 
+
     SDL_Event event;
     SDL_PollEvent(&event);
     
@@ -82,6 +120,7 @@ void handle_input(void) {
                     break;
                 case SDLK_t:
                     render_settings->TEXTURE_FACES = !(render_settings->TEXTURE_FACES); 
+                    break;
                 default:
                     break;
             }
@@ -209,6 +248,13 @@ matrix4_t get_camera_view_matrix(camera_t camera) {
     return view_matrix; 
 }
 
+void update_camera_pose(camera_t *camera, vec3_t velocity, vec3_t orientation) {
+    // move camera in global frame with relative translation input(position)
+    camera->position.x += velocity.x; 
+    camera->position.y += velocity.y; 
+    camera->position.z += velocity.z; 
+}
+
 void update(void) {
     delta_time = SDL_GetTicks() - previous_frame_time;
 
@@ -235,9 +281,9 @@ void update(void) {
 
     main_mesh.translation.z = 5; 
     // look_at.z = 5;
-    main_camera.position.x += 1.5 * delta_time_scale_factor;
-    // main_camera.position.z += 0.05 * delta_time_scale_factor; 
-    main_camera.position.y += 1.5 * delta_time_scale_factor;
+    // main_camera.position.x += 1.5 * delta_time_scale_factor;
+    // main_camera.position.z += 1.5 * delta_time_scale_factor; 
+    // main_camera.position.y += 1.5 * delta_time_scale_factor;
 
     // matrix to transform(rotate + translate) the vertices in the global reference frame 
     matrix4_t mesh_transformation_matrix = get_transformation_matrix(main_mesh.scale, main_mesh.rotation, main_mesh.translation); 
