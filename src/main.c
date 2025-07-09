@@ -54,40 +54,53 @@ void setup(void) {
 }
 
 void handle_input(void) {
-    // Simple FPS camera movement using Arrow keys
+    // ----- Simple FPS camera movement using Arrow keys --- //
 
+    /*
+    Controls: 
+    Move = Arrow Keys
+    Yaw = A / D
+    */
     const uint8_t* state = SDL_GetKeyboardState(NULL);
 
+    // comptute camera z vector 
+    main_camera.camera_forward = sub_vec3(main_camera.look_at, main_camera.position);
+
     if (state[SDL_SCANCODE_UP]) {
-        main_camera.position.z += 1.5 * delta_time_scale_factor; 
+        vec3_t velocity_z = mul_vec3(main_camera.camera_forward, 1.5 * delta_time_scale_factor); 
+        main_camera.position = add_vec3(velocity_z, main_camera.position); 
     }
 
     if (state[SDL_SCANCODE_DOWN]) {
-        main_camera.position.z -= 1.5 * delta_time_scale_factor; 
+        vec3_t velocity_z = mul_vec3(main_camera.camera_forward, -1.5 * delta_time_scale_factor); 
+        main_camera.position = add_vec3(velocity_z, main_camera.position); 
     }
 
-    // if (state[SDL_SCANCODE_LEFT]) {
-    //     main_camera.position.x -= 1.5 * delta_time_scale_factor; 
-    // }
+    if (state[SDL_SCANCODE_LEFT]) {
+        vec3_t velocity_x = get_normalized_vector(get_crossproduct(main_camera.camera_forward, up)); 
+        velocity_x = mul_vec3(velocity_x, 1.5 * delta_time_scale_factor); 
+        main_camera.position = add_vec3(velocity_x, main_camera.position); 
+    }
 
-    // if (state[SDL_SCANCODE_RIGHT]) {
-    //     main_camera.position.x += 1.5 * delta_time_scale_factor; 
-    // }
+    if (state[SDL_SCANCODE_RIGHT]) {
+        vec3_t velocity_x = get_normalized_vector(get_crossproduct(main_camera.camera_forward, up)); 
+        velocity_x = mul_vec3(velocity_x, -1.5 * delta_time_scale_factor); 
+        main_camera.position = add_vec3(velocity_x, main_camera.position); 
+    }
 
-    // if (state[SDL_SCANCODE_A]) {
-    //     main_camera.rotation.y -= 0.5 * delta_time_scale_factor; 
-    // }
+    if (state[SDL_SCANCODE_A]) {
+        main_camera.rotation.y += 0.5 * delta_time_scale_factor; 
+    }
 
-    // if (state[SDL_SCANCODE_D]) {
-    //     main_camera.rotation.y += 0.5 * delta_time_scale_factor; 
-    // }
+    if (state[SDL_SCANCODE_D]) {
+        main_camera.rotation.y -= 0.5 * delta_time_scale_factor; 
+    }
 
     // update camera look vector
-    // main_camera.look_at.x = main_camera.position.x; 
-    // matrix4_t look_vector_rotation_matrix = get_rotation_matrix(main_camera.rotation); 
-    // main_camera.look_at = get_vec3_from_homogeneous(mul_matrix4_vec4(look_vector_rotation_matrix, get_homogeneous_from_vec3(main_camera.look_at))); 
-
+    vec4_t look_target = {.x=0, .y=0, .z=1, .w=0};
+    main_camera.look_at = get_normalized_vector(get_vec3_from_homogeneous(mul_matrix4_vec4(get_rotation_matrix(main_camera.rotation), look_target))); 
     main_camera.look_at = add_vec3(main_camera.look_at, main_camera.position); 
+  // ----- FPS Movement ---- // 
 
     SDL_Event event;
     SDL_PollEvent(&event);

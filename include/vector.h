@@ -36,6 +36,7 @@ vec2_t sub_vec2(vec2_t a, vec2_t b);
 vec3_t add_vec3(vec3_t a, vec3_t b);
 vec3_t sub_vec3(vec3_t a, vec3_t b);
 
+vec3_t mul_vec3(vec3_t vec, float scale);
 vec3_t div_vec3(vec3_t vec, float scale); 
 
 vec3_t get_crossproduct(vec3_t a, vec3_t b); 

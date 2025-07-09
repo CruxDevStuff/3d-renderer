@@ -25,6 +25,7 @@ typedef struct {
 typedef struct {
     vec3_t position; 
     vec3_t rotation; 
+    vec3_t camera_forward; // z in "camera / local" frame. forward direction of camera.
     vec3_t look_at; 
 } camera_t; 
 
