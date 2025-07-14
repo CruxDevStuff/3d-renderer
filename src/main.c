@@ -29,6 +29,10 @@ global_light_t global_light = {
     .dir.z = 1, 
 }; 
 
+vec3_t vertices[3];
+float z_near = 3; 
+float z_far = 20; 
+
 void setup(void) {
     frame_buffer = (uint32_t*)malloc((sizeof(uint32_t)) * (window_width * window_height)); 
 
@@ -36,8 +40,9 @@ void setup(void) {
         return;
     }
 
+    float FOV = M_PI / 3; 
     frame_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, window_width, window_height); 
-    proj_m = get_perspective_proj_matrix(M_PI/3, aspect_ratio, 0.1, 100); 
+    proj_m = get_perspective_proj_matrix(FOV, aspect_ratio, z_near, z_far); 
 
     // initialize z buffer to max depth value(100)
     size_t z_buffer_size = (sizeof(double)) * (window_width * window_height);
@@ -51,7 +56,10 @@ void setup(void) {
 
     z_buffer_n = window_height * window_width; 
     texture_buffer_n = texture_height * texture_width; 
+
+    init_frustum_planes(FOV, z_near, z_far); 
 }
+
 
 void handle_input(void) {
     // ----- Simple FPS camera movement using Arrow keys --- //
@@ -293,7 +301,6 @@ void update(void) {
     // main_mesh.rotation.z += 0.01; 
 
     main_mesh.translation.z = 5; 
-    // look_at.z = 5;
     // main_camera.position.x += 1.5 * delta_time_scale_factor;
     // main_camera.position.z += 1.5 * delta_time_scale_factor; 
     // main_camera.position.y += 1.5 * delta_time_scale_factor;
@@ -311,8 +318,6 @@ void update(void) {
     // return; 
  
     for (int i = 0; i < mesh_face_count; i++) {
-        vec3_t vertices[3];
-
         vertices[0] =  main_mesh.vertices[main_mesh.faces[i].a - 1];
         vertices[1] =  main_mesh.vertices[main_mesh.faces[i].b - 1];
         vertices[2] =  main_mesh.vertices[main_mesh.faces[i].c - 1]; 
@@ -342,19 +347,58 @@ void update(void) {
             continue;
         }
 
-        _triangle.projected_vertices[0] = get_perspective_projected_point(vertices[0], proj_m); 
-        _triangle.projected_vertices[1] = get_perspective_projected_point(vertices[1], proj_m); 
-        _triangle.projected_vertices[2] = get_perspective_projected_point(vertices[2], proj_m); 
-        _triangle.projected_normal = vec2_from_vec4(get_perspective_projected_point(add_vec3(div_vec3(face_normal, 2), vertices[0]), proj_m)); 
-        _triangle.light_intensity = face_light_intensity; 
+        // --- DEV CODE --- //
+        clipped_face_t clipped_triangle = get_clipped_face(vertices); 
+        clipped_triangle.face_count = 1; 
 
-        _triangle.uv[0] = main_mesh.faces[i].a_uv; 
-        _triangle.uv[1] = main_mesh.faces[i].b_uv; 
-        _triangle.uv[2] = main_mesh.faces[i].c_uv; 
+        clipped_triangle.faces[0].a = 1; 
+        clipped_triangle.faces[0].b = 2; 
+        clipped_triangle.faces[0].c = 3; 
 
-        _triangle.z_depth = (vertices[0].z + vertices[1].z + vertices[2].z) / 3.0;  // set the z depth of the face to be the average of their z components
-        _triangle.color = main_mesh.faces[i].color;
-        array_push(triangle_buffer, _triangle); 
+        clipped_triangle.vertices[0] = vertices[0]; 
+        clipped_triangle.vertices[1] = vertices[1]; 
+        clipped_triangle.vertices[2] = vertices[2]; 
+
+        polygon_t face_polygon = {
+            .vertex_count = 3, 
+            .vertices[0] = vertices[0], 
+            .vertices[1] = vertices[1], 
+            .vertices[2] = vertices[2], 
+        }; 
+
+        polygon_t clipped_polygon = get_clipped_polygon_against_plane(frustum_planes[PLANE_LEFT], face_polygon); 
+        clipped_polygon = get_clipped_polygon_against_plane(frustum_planes[PLANE_RIGHT], clipped_polygon); 
+        clipped_polygon = get_clipped_polygon_against_plane(frustum_planes[PLANE_TOP], clipped_polygon); 
+        clipped_polygon = get_clipped_polygon_against_plane(frustum_planes[PLANE_BOTTOM], clipped_polygon); 
+        clipped_polygon = get_clipped_polygon_against_plane(frustum_planes[PLANE_NEAR], clipped_polygon); 
+        clipped_polygon = get_clipped_polygon_against_plane(frustum_planes[PLANE_FAR], clipped_polygon); 
+
+        for (int j = 0; j < clipped_polygon.vertex_count; j++) {
+            vec4_t p = get_perspective_projected_point(clipped_polygon.vertices[j], proj_m); 
+            draw_rectangle(p.x, p.y-3, 6, 6, 0xFFFF0000);
+        }
+        // ----- DEV CODE -- // 
+
+        for (int f = 0; f < clipped_triangle.face_count; f++) {
+            vertices[0] = clipped_triangle.vertices[(clipped_triangle.faces[f].a)-1];
+            vertices[1] = clipped_triangle.vertices[(clipped_triangle.faces[f].b)-1];
+            vertices[2] = clipped_triangle.vertices[(clipped_triangle.faces[f].c)-1];
+
+            _triangle.projected_vertices[0] = get_perspective_projected_point(vertices[0], proj_m); 
+            _triangle.projected_vertices[1] = get_perspective_projected_point(vertices[1], proj_m); 
+            _triangle.projected_vertices[2] = get_perspective_projected_point(vertices[2], proj_m); 
+            _triangle.projected_normal = vec2_from_vec4(get_perspective_projected_point(add_vec3(div_vec3(face_normal, 2), vertices[0]), proj_m)); 
+            _triangle.light_intensity = face_light_intensity; 
+
+            _triangle.uv[0] = main_mesh.faces[i].a_uv; 
+            _triangle.uv[1] = main_mesh.faces[i].b_uv; 
+            _triangle.uv[2] = main_mesh.faces[i].c_uv; 
+
+            _triangle.z_depth = (vertices[0].z + vertices[1].z + vertices[2].z) / 3.0;  // set the z depth of the face to be the average of their z components
+            _triangle.color = main_mesh.faces[i].color;
+            
+            array_push(triangle_buffer, _triangle); 
+        }
     }
 }
 
