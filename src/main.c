@@ -96,6 +96,16 @@ void handle_input(void) {
         main_camera.position = add_vec3(velocity_x, main_camera.position); 
     }
 
+    if (state[SDL_SCANCODE_I]) {
+        vec3_t velocity_y = mul_vec3(up, 1.5 * delta_time_scale_factor); 
+        main_camera.position = add_vec3(velocity_y, main_camera.position); 
+    }
+
+    if (state[SDL_SCANCODE_K]) {
+        vec3_t velocity_y = mul_vec3(up, -1.5 * delta_time_scale_factor); 
+        main_camera.position = add_vec3(velocity_y, main_camera.position); 
+    }
+
     if (state[SDL_SCANCODE_A]) {
         main_camera.rotation.y += 0.5 * delta_time_scale_factor; 
     }
@@ -316,6 +326,7 @@ void update(void) {
 
     // array_push(triangle_buffer, simple_triangle); 
     // return; 
+    
  
     for (int i = 0; i < mesh_face_count; i++) {
         vertices[0] =  main_mesh.vertices[main_mesh.faces[i].a - 1];
