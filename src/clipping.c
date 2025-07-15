@@ -57,12 +57,6 @@ polygon_t get_clipped_polygon_against_plane(plane_t clip_plane, polygon_t polygo
 
         cur_vertex_dotp_plane = get_dotproduct(sub_vec3(cur_vertex, clip_plane.origin), clip_plane.normal); 
 
-        if (cur_vertex_dotp_plane >= 0 && i != polygon.vertex_count) {
-            // add vertex to return polygon 
-            clipped_polygon.vertices[clipped_vertex_idx] = cur_vertex; 
-            clipped_vertex_idx++; 
-        }
-
         if (cur_vertex_dotp_plane * prev_vertex_dotp_plane < 0 && i != 0) {
             // calculate intersection vertex and add to return polygon
             float t = prev_vertex_dotp_plane / (prev_vertex_dotp_plane - cur_vertex_dotp_plane); 
@@ -71,6 +65,12 @@ polygon_t get_clipped_polygon_against_plane(plane_t clip_plane, polygon_t polygo
             vec3_t clipped_vertex = mul_vec3(prev_to_cur_vertex_vector, t); 
             clipped_vertex = add_vec3(clipped_vertex, prev_vertex); 
             clipped_polygon.vertices[clipped_vertex_idx] = clipped_vertex;
+            clipped_vertex_idx++; 
+        }
+
+        if (cur_vertex_dotp_plane >= 0 && i != polygon.vertex_count) {
+            // add vertex to return polygon 
+            clipped_polygon.vertices[clipped_vertex_idx] = cur_vertex; 
             clipped_vertex_idx++; 
         }
 
@@ -100,15 +100,13 @@ clipped_face_t get_clipped_face(const vec3_t vertices[3]) {
     clipped_polygon = get_clipped_polygon_against_plane(frustum_planes[PLANE_FAR], clipped_polygon); 
 
     // create triangles/faces from clipped polygon  
+    // Triangle fan - https://en.wikipedia.org/wiki/Triangle_fan
     clipped_face_t clipped_face = {.face_count=0, .vertex_count=0};
 
     for (int i = 0; i < clipped_polygon.vertex_count; i++) {
         clipped_face.vertices[i] = clipped_polygon.vertices[i]; 
         clipped_face.vertex_count++; 
     }
-    
-    int v0_idx = 0; 
-    int v1_idx, v2_idx; 
 
     for (int i = 0; i < (clipped_face.vertex_count-2); i++) {
         face_t cur_face = {.a=0, .b=i+1, .c=i+2}; 
