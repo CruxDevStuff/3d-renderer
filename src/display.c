@@ -63,7 +63,7 @@ void clear_frame_buffer(uint32_t clear_color) {
 }
 
 void draw_pixel(int x, int y, uint32_t color) {
-    if (x < 0 || x > window_width || y < 0 || y > window_height) {
+    if (x < 0 || x >= window_width || y < 0 || y >= window_height) {
         // TODO: add logging to seperate file 
         printf("bad pixel access, X: %d, Y: %d\n", x, y); 
         return; 

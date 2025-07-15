@@ -30,7 +30,7 @@ global_light_t global_light = {
 }; 
 
 vec3_t vertices[3];
-float z_near = 3; 
+float z_near = 0.1; 
 float z_far = 20; 
 
 void setup(void) {
@@ -428,7 +428,6 @@ int main(int argc, char* argv[]) {
 
         // NOTE: texture file should be .png with the same name and at the same location as the .obj file
         // main_mesh_texture = (uint32_t*)REDBRICK_TEXTURE; 
-        // TODO: extract texture width and height from file meta deta
         char *texture_file_path = malloc(strlen(argv[1]) + 1);
         strcpy(texture_file_path, argv[1]); 
         char *extension_delimeter = strrchr(texture_file_path, '.')+1; 
