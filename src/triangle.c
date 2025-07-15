@@ -14,17 +14,17 @@ triangle_t simple_triangle = {
 };
 
 void draw_triangle(triangle_t triangle, uint32_t color) {
+    // lines between vertices
+    draw_line(vec2_from_vec4(triangle.projected_vertices[0]), vec2_from_vec4(triangle.projected_vertices[1]), 1, color); 
+    draw_line(vec2_from_vec4(triangle.projected_vertices[1]), vec2_from_vec4(triangle.projected_vertices[2]), 1, color); 
+    draw_line(vec2_from_vec4(triangle.projected_vertices[2]), vec2_from_vec4(triangle.projected_vertices[0]), 1, color); 
+    
     // draw vertices 
     if (render_settings->DRAW_VERTICES) {
         draw_rectangle(triangle.projected_vertices[0].x, triangle.projected_vertices[0].y, 4, 4, 0xFFFF0000);
         draw_rectangle(triangle.projected_vertices[1].x, triangle.projected_vertices[1].y, 4, 4, 0xFFFF0000);
         draw_rectangle(triangle.projected_vertices[2].x, triangle.projected_vertices[2].y, 4, 4, 0xFFFF0000);
     }
-
-    // lines between vertices
-    draw_line(vec2_from_vec4(triangle.projected_vertices[0]), vec2_from_vec4(triangle.projected_vertices[1]), 1, color); 
-    draw_line(vec2_from_vec4(triangle.projected_vertices[1]), vec2_from_vec4(triangle.projected_vertices[2]), 1, color); 
-    draw_line(vec2_from_vec4(triangle.projected_vertices[2]), vec2_from_vec4(triangle.projected_vertices[0]), 1, color); 
 }
 
 void fill_flat_bottom_triangle(vec4_t vertex_0, vec4_t vertex_1, vec4_t vertex_2, vec4_t*parent_vertices, uv_t uv_0, uv_t uv_1, uv_t uv_2, uint32_t color, fill_t FILL_TYPE) {

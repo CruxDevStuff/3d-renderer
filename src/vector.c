@@ -105,6 +105,27 @@ vec3_t get_crossproduct(vec3_t a, vec3_t b) {
     return result; 
 }
 
+uv_t add_uv(uv_t a, uv_t b) {
+    return (uv_t) {
+        .u=a.u + b.u, 
+        .v=a.v + b.v
+    };
+}
+
+uv_t sub_uv(uv_t a, uv_t b) {
+    return (uv_t) {
+        .u=a.u - b.u, 
+        .v=a.v - b.v
+    };
+}
+
+uv_t mul_uv(uv_t a, float scale) {
+    return (uv_t) {
+        .u=a.u * scale, 
+        .v=a.v * scale 
+    }; 
+}
+
 float get_dotproduct(vec3_t a, vec3_t b) {
     return ((a.x * b.x) + (a.y * b.y) + (a.z * b.z)); 
 }

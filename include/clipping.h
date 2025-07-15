@@ -25,6 +25,7 @@ typedef struct {
 typedef struct {
     int vertex_count; 
     vec3_t vertices[10]; 
+    uv_t uv[10];
     /*
     maximum possible new vertices for a triangle clipped against 6 planes is 9. 
     So round up to 10 for the vertices array size.
@@ -41,7 +42,7 @@ enum FRUSTUM_PLANES {
 }; 
 
 polygon_t get_clipped_polygon_against_plane(plane_t clip_plane, polygon_t polygon);
-clipped_face_t get_clipped_face(const vec3_t vertices[3]); 
+clipped_face_t get_clipped_face(const vec3_t vertices[3], const uv_t uv[3]); 
 void init_frustum_planes(float fov, float z_near, float z_far); 
 #endif
 

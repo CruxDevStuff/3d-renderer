@@ -323,10 +323,6 @@ void update(void) {
 
     // combine both global and camera view matrices 
     matrix4_t final_transformation_matrix = mul_matrix4_matrix4(view_matrix, mesh_transformation_matrix);
-
-    // array_push(triangle_buffer, simple_triangle); 
-    // return; 
-    
  
     for (int i = 0; i < mesh_face_count; i++) {
         vertices[0] =  main_mesh.vertices[main_mesh.faces[i].a - 1];
@@ -357,33 +353,17 @@ void update(void) {
         if (cam_face_align < 0 && render_settings->ENABLE_BACKFACE_CULLING) {
             continue;
         }
-
-        // --- DEV CODE --- //
-        clipped_face_t clipped_triangle = get_clipped_face(vertices); 
-        // clipped_triangle.face_count = 1; 
-
-        // clipped_triangle.faces[0].a = 0; 
-        // clipped_triangle.faces[0].b = 1; 
-        // clipped_triangle.faces[0].c = 2; 
-
-        // clipped_triangle.vertices[0] = vertices[0]; 
-        // clipped_triangle.vertices[1] = vertices[1]; 
-        // clipped_triangle.vertices[2] = vertices[2]; 
-
-        polygon_t face_polygon = {
-            .vertex_count = 3, 
-            .vertices[0] = vertices[0], 
-            .vertices[1] = vertices[1], 
-            .vertices[2] = vertices[2], 
-        }; 
-
-        for (int j = 0; j < clipped_triangle.vertex_count; j++) {
-            vec4_t p = get_perspective_projected_point(clipped_triangle.vertices[j], proj_m); 
-            // draw_rectangle((p.x-6), (p.y-6), 6, 6, 0xFFFF0000);
-        }
         
-        // ----- DEV CODE -- // 
+        // prepare and send current face / triangle to clipping
+        uv_t face_uv[3]; 
+        
+        face_uv[0] = main_mesh.faces[i].a_uv; 
+        face_uv[1] = main_mesh.faces[i].b_uv; 
+        face_uv[2] = main_mesh.faces[i].c_uv; 
 
+        clipped_face_t clipped_triangle = get_clipped_face(vertices, face_uv); 
+        
+        // iterate through returned clipped faces, do projection and send to draw buffer 
         for (int f = 0; f < clipped_triangle.face_count; f++) {
             vertices[0] = clipped_triangle.vertices[(clipped_triangle.faces[f].a)];
             vertices[1] = clipped_triangle.vertices[(clipped_triangle.faces[f].b)];
@@ -395,9 +375,9 @@ void update(void) {
             _triangle.projected_normal = vec2_from_vec4(get_perspective_projected_point(add_vec3(div_vec3(face_normal, 2), vertices[0]), proj_m)); 
             _triangle.light_intensity = face_light_intensity; 
 
-            _triangle.uv[0] = main_mesh.faces[i].a_uv; 
-            _triangle.uv[1] = main_mesh.faces[i].b_uv; 
-            _triangle.uv[2] = main_mesh.faces[i].c_uv; 
+            _triangle.uv[0] = clipped_triangle.faces[f].a_uv; 
+            _triangle.uv[1] = clipped_triangle.faces[f].b_uv; 
+            _triangle.uv[2] = clipped_triangle.faces[f].c_uv; 
 
             _triangle.z_depth = (vertices[0].z + vertices[1].z + vertices[2].z) / 3.0;  // set the z depth of the face to be the average of their z components
             _triangle.color = main_mesh.faces[i].color;

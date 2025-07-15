@@ -1,6 +1,7 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 #include "stdio.h"
+#include "texture.h"
 
 typedef struct {
     float x;
@@ -46,6 +47,10 @@ vec3_t get_normalized_vector(vec3_t vec);
 
 vec4_t get_homogeneous_from_vec3(vec3_t vec);
 vec3_t get_vec3_from_homogeneous(vec4_t vec); 
+
+uv_t add_uv(uv_t a, uv_t b);
+uv_t sub_uv(uv_t a, uv_t b);
+uv_t mul_uv(uv_t a, float scale);
 
 void test_vector_ops(void); 
 vec2_t vec2_from_vec4(vec4_t v); 
