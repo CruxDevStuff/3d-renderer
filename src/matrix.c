@@ -116,19 +116,22 @@ vec4_t get_perspective_projected_point(vec3_t point, matrix4_t proj_m) {
         v.x /= v.w; 
         v.y /= v.w; 
     }
-    // vec2_t r = {.x=v.x, .y=v.y}; 
 
+    // SCREEN SPACE -> [x = (0, 1399), y = (0, 899)]. Transformations bellow account for this by subtracting 1 from window_height and width
+    
     // NDC(-1, 1) to screen space
-    v.x *= window_width / 2.0; 
-    v.y *= window_height / 2.0; 
+    v.x *= (window_width  - 1) / 2; 
+    v.y *= (window_height - 1) / 2; 
+
     // account for inverted screen space. mesh y values +y is bottom but +y in screen space is down;
     v.y *= -1; 
+
     /* 
     screen origin (0, 0) is at top left while our 3D cartesian space origin (0,0,0) is middle of the screen, 
     translate all points to account for this offset between world and screen space
     */
-    v.x += window_width / 2.0; 
-    v.y += window_height / 2.0; 
+    v.x += (window_width  - 1) / 2; 
+    v.y += (window_height - 1) / 2; 
 
     return v; 
 }

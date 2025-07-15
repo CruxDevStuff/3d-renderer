@@ -4,7 +4,7 @@
 #include "triangle.h"
 
 typedef struct {
-    int face_count; 
+    int face_count, vertex_count; 
     vec3_t vertices[10];
     face_t faces[10]; 
     /*

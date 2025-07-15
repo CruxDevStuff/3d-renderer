@@ -25,7 +25,8 @@ bool create_window(void) {
 
     window_width = display_node.w; 
     window_height = display_node.h; 
-    aspect_ratio = (float)window_height / (float)window_width;  
+    aspect_ratio_y = (float)window_height / (float)window_width;  
+    aspect_ratio_x = (float)window_width / (float)window_height;  
 
     window = SDL_CreateWindow("renderer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, SDL_WINDOW_BORDERLESS);
     if (!window) {
@@ -63,11 +64,13 @@ void clear_frame_buffer(uint32_t clear_color) {
 
 void draw_pixel(int x, int y, uint32_t color) {
     if (x < 0 || x > window_width || y < 0 || y > window_height) {
-        // printf("bad pixel access, X: %d, Y: %d\n", x, y); 
+        // TODO: add logging to seperate file 
+        printf("bad pixel access, X: %d, Y: %d\n", x, y); 
         return; 
     }
-
-    frame_buffer[(y * window_width) + x] = color; 
+    
+    int idx = (y * (window_width)) + x; 
+    frame_buffer[idx] = color; 
 }
 
 void draw_grid(void) {

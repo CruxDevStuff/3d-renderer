@@ -22,9 +22,9 @@ void draw_triangle(triangle_t triangle, uint32_t color) {
     }
 
     // lines between vertices
-    draw_line(vec2_from_vec4(triangle.projected_vertices[0]), vec2_from_vec4(triangle.projected_vertices[1]), 2, color); 
-    draw_line(vec2_from_vec4(triangle.projected_vertices[1]), vec2_from_vec4(triangle.projected_vertices[2]), 2, color); 
-    draw_line(vec2_from_vec4(triangle.projected_vertices[2]), vec2_from_vec4(triangle.projected_vertices[0]), 2, color); 
+    draw_line(vec2_from_vec4(triangle.projected_vertices[0]), vec2_from_vec4(triangle.projected_vertices[1]), 1, color); 
+    draw_line(vec2_from_vec4(triangle.projected_vertices[1]), vec2_from_vec4(triangle.projected_vertices[2]), 1, color); 
+    draw_line(vec2_from_vec4(triangle.projected_vertices[2]), vec2_from_vec4(triangle.projected_vertices[0]), 1, color); 
 }
 
 void fill_flat_bottom_triangle(vec4_t vertex_0, vec4_t vertex_1, vec4_t vertex_2, vec4_t*parent_vertices, uv_t uv_0, uv_t uv_1, uv_t uv_2, uint32_t color, fill_t FILL_TYPE) {
@@ -89,7 +89,6 @@ void fill_flat_top_triangle(vec4_t vertex_0, vec4_t vertex_1, vec4_t vertex_2, v
         if (start.x < end.x) {
             for (int x=start.x; x < end.x; x++) {
                 vec4_t current_point = {.x=x, .y=start.y};
-                // TODO: check z buffer before draw call 
                 paint_texture(current_point, main_mesh_texture, parent_vertices, uv_0, uv_1, uv_2, FILL_TYPE, color); 
             }
         } else if (end.x < start.x) {

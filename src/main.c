@@ -42,7 +42,7 @@ void setup(void) {
 
     float FOV = M_PI / 3; 
     frame_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, window_width, window_height); 
-    proj_m = get_perspective_proj_matrix(FOV, aspect_ratio, z_near, z_far); 
+    proj_m = get_perspective_proj_matrix(FOV, aspect_ratio_y, z_near, z_far); 
 
     // initialize z buffer to max depth value(100)
     size_t z_buffer_size = (sizeof(double)) * (window_width * window_height);
@@ -360,15 +360,15 @@ void update(void) {
 
         // --- DEV CODE --- //
         clipped_face_t clipped_triangle = get_clipped_face(vertices); 
-        clipped_triangle.face_count = 1; 
+        // clipped_triangle.face_count = 1; 
 
-        clipped_triangle.faces[0].a = 1; 
-        clipped_triangle.faces[0].b = 2; 
-        clipped_triangle.faces[0].c = 3; 
+        // clipped_triangle.faces[0].a = 0; 
+        // clipped_triangle.faces[0].b = 1; 
+        // clipped_triangle.faces[0].c = 2; 
 
-        clipped_triangle.vertices[0] = vertices[0]; 
-        clipped_triangle.vertices[1] = vertices[1]; 
-        clipped_triangle.vertices[2] = vertices[2]; 
+        // clipped_triangle.vertices[0] = vertices[0]; 
+        // clipped_triangle.vertices[1] = vertices[1]; 
+        // clipped_triangle.vertices[2] = vertices[2]; 
 
         polygon_t face_polygon = {
             .vertex_count = 3, 
@@ -377,23 +377,17 @@ void update(void) {
             .vertices[2] = vertices[2], 
         }; 
 
-        polygon_t clipped_polygon = get_clipped_polygon_against_plane(frustum_planes[PLANE_LEFT], face_polygon); 
-        clipped_polygon = get_clipped_polygon_against_plane(frustum_planes[PLANE_RIGHT], clipped_polygon); 
-        clipped_polygon = get_clipped_polygon_against_plane(frustum_planes[PLANE_TOP], clipped_polygon); 
-        clipped_polygon = get_clipped_polygon_against_plane(frustum_planes[PLANE_BOTTOM], clipped_polygon); 
-        clipped_polygon = get_clipped_polygon_against_plane(frustum_planes[PLANE_NEAR], clipped_polygon); 
-        clipped_polygon = get_clipped_polygon_against_plane(frustum_planes[PLANE_FAR], clipped_polygon); 
-
-        for (int j = 0; j < clipped_polygon.vertex_count; j++) {
-            vec4_t p = get_perspective_projected_point(clipped_polygon.vertices[j], proj_m); 
-            draw_rectangle(p.x, p.y-3, 6, 6, 0xFFFF0000);
+        for (int j = 0; j < clipped_triangle.vertex_count; j++) {
+            vec4_t p = get_perspective_projected_point(clipped_triangle.vertices[j], proj_m); 
+            // draw_rectangle((p.x-6), (p.y-6), 6, 6, 0xFFFF0000);
         }
+        
         // ----- DEV CODE -- // 
 
         for (int f = 0; f < clipped_triangle.face_count; f++) {
-            vertices[0] = clipped_triangle.vertices[(clipped_triangle.faces[f].a)-1];
-            vertices[1] = clipped_triangle.vertices[(clipped_triangle.faces[f].b)-1];
-            vertices[2] = clipped_triangle.vertices[(clipped_triangle.faces[f].c)-1];
+            vertices[0] = clipped_triangle.vertices[(clipped_triangle.faces[f].a)];
+            vertices[1] = clipped_triangle.vertices[(clipped_triangle.faces[f].b)];
+            vertices[2] = clipped_triangle.vertices[(clipped_triangle.faces[f].c)];
 
             _triangle.projected_vertices[0] = get_perspective_projected_point(vertices[0], proj_m); 
             _triangle.projected_vertices[1] = get_perspective_projected_point(vertices[1], proj_m); 
