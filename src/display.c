@@ -27,6 +27,7 @@ bool create_window(void) {
     window_height = display_node.h; 
     aspect_ratio_y = (float)window_height / (float)window_width;  
     aspect_ratio_x = (float)window_width / (float)window_height;  
+    z_buffer_n = window_height * window_width; 
 
     window = SDL_CreateWindow("renderer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, SDL_WINDOW_BORDERLESS);
     if (!window) {

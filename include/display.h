@@ -26,6 +26,7 @@ int window_height;
 int window_width; 
 float aspect_ratio_y; 
 float aspect_ratio_x; 
+uint32_t z_buffer_n;
 
 bool create_window(void);
 void clear_frame_buffer(uint32_t clear_color);

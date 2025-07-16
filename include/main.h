@@ -19,6 +19,4 @@ void update(void);
 void clear_z_buffer(); 
 uint32_t wireframe_color = 0xFF00FF00;
 
-extern int texture_buffer_n;
-extern int z_buffer_n;
 extern plane_t frustum_planes[6];

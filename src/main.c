@@ -54,9 +54,6 @@ void setup(void) {
     vec3_t pos = {.x=0, .y=0, .z=0}; 
     main_camera.position = pos; 
 
-    z_buffer_n = window_height * window_width; 
-    texture_buffer_n = texture_height * texture_width; 
-
     init_frustum_planes(FOV, z_near, z_far); 
 }
 

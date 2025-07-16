@@ -82,6 +82,7 @@ uint32_t* load_texture_from_png(char* filename) {
             texture_data = (uint32_t*)upng_get_buffer(png_texture); 
             texture_height = upng_get_height(png_texture); 
             texture_width = upng_get_width(png_texture); 
+            texture_buffer_n = texture_height * texture_width; 
             return texture_data;
         }
     }

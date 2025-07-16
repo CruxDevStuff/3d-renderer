@@ -13,8 +13,7 @@ typedef struct {
 extern int texture_width;
 extern int texture_height;
 
-int texture_buffer_n;
-int z_buffer_n;
+uint32_t texture_buffer_n;
 
 extern uint32_t* main_mesh_texture;
 extern upng_t* png_texture; 
