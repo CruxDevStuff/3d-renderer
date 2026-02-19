@@ -1,7 +1,7 @@
 ## 3D software renderer from sratch in C (just for fun)
 
 ### Build and Run 
-```make build && ./renderer f22.obj```
+```make build && ./renderer assets/f22.obj```
 
 ## Preview
 ### Wireframe

@@ -301,11 +301,12 @@ void update(void) {
     triangle_t _triangle; 
     int mesh_face_count = array_length(main_mesh.faces); 
 
-    // main_mesh.rotation.y += 0.01; 
     // main_mesh.rotation.y = -(M_PI/2); 
     // main_mesh.rotation.x = M_PI/1;                       
-    // main_mesh.rotation.x += 0.01;
-    // main_mesh.rotation.z += 0.01; 
+
+    main_mesh.rotation.y += 0.01; 
+    main_mesh.rotation.x += 0.01;
+    main_mesh.rotation.z += 0.01; 
 
     main_mesh.translation.z = 5; 
     // main_camera.position.x += 1.5 * delta_time_scale_factor;
